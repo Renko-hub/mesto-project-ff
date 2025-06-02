@@ -1,64 +1,65 @@
-const path = require('path');
+const path = require('path'); 
+
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   entry: './src/pages/index.js',
   output: {
-    path: path.resolve(__dirname, 'dist'), // куда помещаются собранные файлы
-    filename: 'bundle.js', // имя выходного JavaScript-файла
-    publicPath: '/', // базовый публичный путь для всех ресурсов
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'bundle.js',
   },
-  mode: 'development', // development или production
+  mode: 'development',
   devServer: {
-    static: path.resolve(__dirname, './dist'), // статический контент из dist
-    compress: true, // сжатие gzip
-    port: 8080, // порт запуска локального сервера
-    open: true, // открытие страницы в браузере при запуске
+    static: path.resolve(__dirname, './dist'),
+    compress: true,
+    port: 8080,
+    open: true,
   },
   module: {
     rules: [
       {
         test: /\.js$/,
         use: 'babel-loader',
-        exclude: /node_modules/, // исключить обработку node_modules
+        exclude: /node_modules/, 
       },
       {
         test: /\.(png|svg|jpg|jpeg|gif)$/,
-        type: 'asset/resource', // авто-копируем картинку в директорию dist
+        type: 'asset/resource',
         generator: {
-          filename: 'images/[name].[contenthash:8][ext]', // новые имена файлов с уникальным хэшем
+          filename: 'images/[name].[hash][ext]',
         },
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
-        type: 'asset/resource', // тоже касается шрифтов
+        type: 'asset/resource',
         generator: {
-          filename: 'fonts/[name].[contenthash:8][ext]', // уникальные имена для шрифтов
+          filename: 'fonts/[name].[hash][ext]',
         },
       },
       {
         test: /\.css$/,
         use: [
-          MiniCssExtractPlugin.loader, // выгружает CSS отдельно
+          MiniCssExtractPlugin.loader,
           {
             loader: 'css-loader',
             options: {
-              importLoaders: 1, // поддержка импортируемых зависимостей
+              importLoaders: 1,
             },
           },
-          'postcss-loader', // постобработка стилей
+          'postcss-loader',
         ],
       },
     ],
   },
   plugins: [
-    new HtmlWebpackPlugin({ // автоматическая генерация HTML
+    new HtmlWebpackPlugin({
       template: './src/index.html',
-      inject: true, // внедрять скрипты и стили в HTML
     }),
-    new CleanWebpackPlugin(), // очистка старого содержимого dist перед каждой сборкой
-    new MiniCssExtractPlugin(), // отделяет CSS в отдельные файлы
+    new CleanWebpackPlugin(), 
+    new MiniCssExtractPlugin(),
   ],
 };

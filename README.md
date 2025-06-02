@@ -1,3 +1,3 @@
 # Проектная работа Mesto
 
-https://github.com/Renko-hub/mesto-project-ff/tree/dev
+https://github.com/Renko-hub/mesto-project-ff
