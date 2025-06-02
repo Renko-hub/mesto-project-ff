@@ -10,7 +10,7 @@ function createCard({ name, link }, openFullImageCallback) { // получает
   const imageCard = element.querySelector('.card__image');
   const titleCard = element.querySelector('.card__title');
   const buttonLikeCard = element.querySelector('.card__like-button');
-  const buttonDeleteCard = element.querySelector('.card__delete-button');
+  const buttonDeleteCard = element.querySelector('.card__delete-button'); // Правильно выбрали кнопку удаления
 
   imageCard.src = link;
   imageCard.alt = name;
@@ -19,7 +19,7 @@ function createCard({ name, link }, openFullImageCallback) { // получает
   // Регистрация обработчиков событий
   imageCard.addEventListener('click', () => openFullImageCallback(link, name)); // вызываем callback
   buttonLikeCard.addEventListener('click', () => handleCardLike(buttonLikeCard));
-  buttonDeleteCard.addEventListener('click', () => removeCard(element));
+  buttonDeleteCard.addEventListener('click', () => removeCard(element)); // правильный обработчик удаления
 
   return element;
 }
