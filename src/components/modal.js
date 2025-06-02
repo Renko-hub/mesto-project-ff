@@ -1,57 +1,71 @@
 // modal.js
 
-// Обработчик открытия модальных окон
-function openModal(element) {
-  element.classList.add('popup_is-opened');
-  document.addEventListener('keydown', handleDocumentKeydown);
+// Элементы модальных окон
+const editProfilePopup = document.querySelector('.popup.popup_type_edit');
+const newPlacePopup = document.querySelector('.popup.popup_type_new-card');
+const imagePopup = document.querySelector('.popup.popup_type_image');
+
+// Открытое окно
+let currentOpenedPopup = null;
+
+// Открыть окно редактирования профиля
+function openEditProfilePopup() {
+  editProfilePopup.classList.add('popup_is-opened');
+  currentOpenedPopup = editProfilePopup;
+  document.addEventListener('keydown', closeEscPopup);
 }
 
-// Обработчик закрытия модальных окон
-function closeModal(element) {
-  element.classList.remove('popup_is-opened');
-  document.removeEventListener('keydown', handleDocumentKeydown);
+// Открыть окно добавления карточки
+function openNewPlacePopup() {
+  newPlacePopup.classList.add('popup_is-opened');
+  currentOpenedPopup = newPlacePopup;
+  document.addEventListener('keydown', closeEscPopup);
 }
 
-// Обработчик нажатия на Esc
-function handleDocumentKeydown(event) {
-  if (event.key === 'Escape') {
-    const currentOpenPopup = document.querySelector('.popup_is-opened');
-    if (currentOpenPopup) {
-      closeModal(currentOpenPopup);
-    }
+// Открыть окно с изображением
+function openImagePopup() {
+  imagePopup.classList.add('popup_is-opened');
+  currentOpenedPopup = imagePopup;
+  document.addEventListener('keydown', closeEscPopup);
+}
+
+// Закрыть любое активное окно
+function closePopup() {
+  if (currentOpenedPopup) {
+    currentOpenedPopup.classList.remove('popup_is-opened');
+    currentOpenedPopup = null;
+    document.removeEventListener('keydown', closeEscPopup);
   }
 }
 
-// Обработчик кликов на модальных окнах
-function handleModalClick(event) {
-  const targetClasses = event.target.classList;
-
-  // Если нажали на фон или крестик
-  if (
-    targetClasses.contains('popup_is-opened') ||
-    event.target.closest('.popup__close')
-  ) {
-    closeModal(event.target.closest('.popup'));
-  }
+// Закрытие окна по нажатию ESC
+function closeEscPopup(event) {
+  if (event.key === 'Escape') closePopup();
 }
 
-// Функция показа изображения в модальном окне
-function showImagePopup(imageSrc, titleText) {
-  const img = document.querySelector('.popup__image');
-  const caption = document.querySelector('.popup__caption');
-
-  img.src = imageSrc;
-  img.alt = titleText;
-  caption.textContent = titleText;
-
-  openModal(document.querySelector('.popup.popup_type_image'));
+// Закрытие окна по клику на фон или кнопку закрытия
+function handleOverlayClick(event) {
+  const target = event.target;
+  if (target.classList.contains('popup_is-opened') || target.closest('.popup__close')) closePopup();
 }
 
-// Групповой экспорт всех функций
+// Показать увеличенное изображение
+function openFullImage(src, alt) {
+  const fullImageElement = imagePopup.querySelector('.popup__image');
+  const captionElement = imagePopup.querySelector('.popup__caption');
+
+  fullImageElement.src = src;
+  fullImageElement.alt = alt;
+  captionElement.textContent = alt;
+
+  openImagePopup();
+}
+
+// Экспорт функций
 export {
-  openModal,
-  closeModal,
-  handleDocumentKeydown,
-  handleModalClick,
-  showImagePopup
+  openEditProfilePopup,
+  openNewPlacePopup,
+  closePopup,
+  handleOverlayClick,
+  openFullImage
 };

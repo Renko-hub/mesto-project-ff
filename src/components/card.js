@@ -1,69 +1,56 @@
 // card.js
 
-// Экспортированная функция createCard
-function createCard(cardData, onLikeHandler) {
-  const template = document.querySelector('#card-template');
+// Элементы интерфейса, относящиеся к карточкам
+const template = document.querySelector('#card-template');
+const placesList = document.querySelector('.places__list');
+
+// Создаем одну карточку
+function createCard({ name, link }, openFullImageCallback) { // получает callback
   const element = template.content.cloneNode(true).firstElementChild;
-
-  // Заполняем поля карточки
-  element.querySelector('.card__image').src = cardData.link;
-  element.querySelector('.card__image').alt = cardData.name;
-  element.querySelector('.card__title').textContent = cardData.name;
-
-  // Найдем кнопку лайка
+  const imageElement = element.querySelector('.card__image');
+  const titleElement = element.querySelector('.card__title');
   const likeButton = element.querySelector('.card__like-button');
-
-  // Присваиваем состояние лайка исходя из переданных данных
-  if (cardData.isLikedByCurrentUser) {
-    likeButton.classList.add('card__like-button_is-active');
-  }
-
-  // Привяжем обработчик лайка
-  likeButton.addEventListener('click', () => {
-    onLikeHandler(likeButton);
-  });
-
-  // Связываем кнопку удаления с обработчиком
   const deleteButton = element.querySelector('.card__delete-button');
-  deleteButton.addEventListener('click', () => {
-    removeCard(element); // Внешний вызов функции removeCard
-  });
+
+  imageElement.src = link;
+  imageElement.alt = name;
+  titleElement.textContent = name;
+
+  // Регистрация обработчиков событий
+  imageElement.addEventListener('click', () => openFullImageCallback(link, name)); // вызываем callback
+  likeButton.addEventListener('click', () => handleCardLike(likeButton));
+  deleteButton.addEventListener('click', () => removeCard(element));
 
   return element;
 }
 
-// Функционал лайка карточки
+// Переключает лайк
 function handleCardLike(buttonElement) {
-  buttonElement.disabled = true;
-
-  if (buttonElement.classList.contains('card__like-button_is-active')) {
-    // Убираем лайк
-    buttonElement.classList.remove('card__like-button_is-active');
-  } else {
-    // Ставим лайк
-    buttonElement.classList.add('card__like-button_is-active');
-  }
-
-  buttonElement.disabled = false;
+  buttonElement.classList.toggle('card__like-button_is-active');
 }
 
-// Удаление карточки
+// Удаляет карточку
 function removeCard(cardElement) {
   cardElement.remove();
 }
 
-// Первая отрисовка карточек
-function renderInitialCards(initialCardsArray) {
-  initialCardsArray.forEach((cardData) => {
-    const newCard = createCard(cardData, handleCardLike);
-    document.querySelector('.places__list').appendChild(newCard);
-  });
+// Рендерит начальные карточки
+function renderInitialCards(cards, openFullImageCallback) { // принимает callback
+  cards.forEach((data) => placesList.append(createCard(data, openFullImageCallback))); // передаем callback
 }
 
-// Групповой экспорт всех функций
+// Загружает данные пользователя в форму
+function loadUserDataToForm(name, description) {
+  const formElements = document.forms['edit-profile'].elements;
+  formElements.name.value = name;
+  formElements.description.value = description;
+}
+
+// Экспорт функций
 export {
   createCard,
   handleCardLike,
   removeCard,
-  renderInitialCards
+  renderInitialCards,
+  loadUserDataToForm
 };
