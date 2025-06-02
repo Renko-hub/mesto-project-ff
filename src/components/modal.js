@@ -1,45 +1,45 @@
 // modal.js
 
 // Элементы модальных окон
-const editProfilePopup = document.querySelector('.popup.popup_type_edit');
-const newPlacePopup = document.querySelector('.popup.popup_type_new-card');
-const imagePopup = document.querySelector('.popup.popup_type_image');
+const popupEditProfile = document.querySelector('.popup.popup_type_edit');
+const popupAddNewPlace = document.querySelector('.popup.popup_type_new-card');
+const popupFullImage = document.querySelector('.popup.popup_type_image');
 
 // Открытое окно
-let currentOpenedPopup = null;
+let activePopup = null;
 
 // Открыть окно редактирования профиля
 function openEditProfilePopup() {
-  editProfilePopup.classList.add('popup_is-opened');
-  currentOpenedPopup = editProfilePopup;
-  document.addEventListener('keydown', closeEscPopup);
+  popupEditProfile.classList.add('popup_is-opened');
+  activePopup = popupEditProfile;
+  document.addEventListener('keydown', closePopupByESC);
 }
 
 // Открыть окно добавления карточки
-function openNewPlacePopup() {
-  newPlacePopup.classList.add('popup_is-opened');
-  currentOpenedPopup = newPlacePopup;
-  document.addEventListener('keydown', closeEscPopup);
+function openAddNewPlacePopup() {
+  popupAddNewPlace.classList.add('popup_is-opened');
+  activePopup = popupAddNewPlace;
+  document.addEventListener('keydown', closePopupByESC);
 }
 
 // Открыть окно с изображением
-function openImagePopup() {
-  imagePopup.classList.add('popup_is-opened');
-  currentOpenedPopup = imagePopup;
-  document.addEventListener('keydown', closeEscPopup);
+function openFullImagePopup() {
+  popupFullImage.classList.add('popup_is-opened');
+  activePopup = popupFullImage;
+  document.addEventListener('keydown', closePopupByESC);
 }
 
 // Закрыть любое активное окно
 function closePopup() {
-  if (currentOpenedPopup) {
-    currentOpenedPopup.classList.remove('popup_is-opened');
-    currentOpenedPopup = null;
-    document.removeEventListener('keydown', closeEscPopup);
+  if (activePopup) {
+    activePopup.classList.remove('popup_is-opened');
+    activePopup = null;
+    document.removeEventListener('keydown', closePopupByESC);
   }
 }
 
 // Закрытие окна по нажатию ESC
-function closeEscPopup(event) {
+function closePopupByESC(event) {
   if (event.key === 'Escape') closePopup();
 }
 
@@ -50,21 +50,21 @@ function handleOverlayClick(event) {
 }
 
 // Показать увеличенное изображение
-function openFullImage(src, alt) {
-  const fullImageElement = imagePopup.querySelector('.popup__image');
-  const captionElement = imagePopup.querySelector('.popup__caption');
+function openFullImage(imageSrc, imageAlt) {
+  const fullImageElement = popupFullImage.querySelector('.popup__image');
+  const captionElement = popupFullImage.querySelector('.popup__caption');
 
-  fullImageElement.src = src;
-  fullImageElement.alt = alt;
-  captionElement.textContent = alt;
+  fullImageElement.src = imageSrc;
+  fullImageElement.alt = imageAlt;
+  captionElement.textContent = imageAlt;
 
-  openImagePopup();
+  openFullImagePopup();
 }
 
 // Экспорт функций
 export {
   openEditProfilePopup,
-  openNewPlacePopup,
+  openAddNewPlacePopup,
   closePopup,
   handleOverlayClick,
   openFullImage

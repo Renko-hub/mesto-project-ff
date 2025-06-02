@@ -1,25 +1,25 @@
 // card.js
 
 // Элементы интерфейса, относящиеся к карточкам
-const template = document.querySelector('#card-template');
-const placesList = document.querySelector('.places__list');
+const templateCard = document.querySelector('#card-template');
+const listPlaces = document.querySelector('.places__list');
 
 // Создаем одну карточку
 function createCard({ name, link }, openFullImageCallback) { // получает callback
-  const element = template.content.cloneNode(true).firstElementChild;
-  const imageElement = element.querySelector('.card__image');
-  const titleElement = element.querySelector('.card__title');
-  const likeButton = element.querySelector('.card__like-button');
-  const deleteButton = element.querySelector('.card__delete-button');
+  const element = templateCard.content.cloneNode(true).firstElementChild;
+  const imageCard = element.querySelector('.card__image');
+  const titleCard = element.querySelector('.card__title');
+  const buttonLikeCard = element.querySelector('.card__like-button');
+  const buttonDeleteCard = element.querySelector('.card__delete-button');
 
-  imageElement.src = link;
-  imageElement.alt = name;
-  titleElement.textContent = name;
+  imageCard.src = link;
+  imageCard.alt = name;
+  titleCard.textContent = name;
 
   // Регистрация обработчиков событий
-  imageElement.addEventListener('click', () => openFullImageCallback(link, name)); // вызываем callback
-  likeButton.addEventListener('click', () => handleCardLike(likeButton));
-  deleteButton.addEventListener('click', () => removeCard(element));
+  imageCard.addEventListener('click', () => openFullImageCallback(link, name)); // вызываем callback
+  buttonLikeCard.addEventListener('click', () => handleCardLike(buttonLikeCard));
+  buttonDeleteCard.addEventListener('click', () => removeCard(element));
 
   return element;
 }
@@ -36,7 +36,7 @@ function removeCard(cardElement) {
 
 // Рендерит начальные карточки
 function renderInitialCards(cards, openFullImageCallback) { // принимает callback
-  cards.forEach((data) => placesList.append(createCard(data, openFullImageCallback))); // передаем callback
+  cards.forEach((data) => listPlaces.append(createCard(data, openFullImageCallback))); // передаем callback
 }
 
 // Загружает данные пользователя в форму
