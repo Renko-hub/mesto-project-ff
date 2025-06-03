@@ -32,27 +32,9 @@ function closePopupESC(event) {
   }
 }
 
-// Специфическая функция открытия окна просмотра изображения
-function showFullscreenImage(imageSrc, imageAlt) {
-  const viewImagePopup = document.querySelector('.popup.popup_type_image');
-  if (!viewImagePopup) {
-    return;
-  }
-
-  const fullImageElement = viewImagePopup.querySelector('.popup__image');
-  const captionElement = viewImagePopup.querySelector('.popup__caption');
-
-  fullImageElement.src = imageSrc;
-  fullImageElement.alt = imageAlt;
-  captionElement.textContent = imageAlt;
-
-  showModal(viewImagePopup);
-}
-
 // Экспортируем публичные функции
 export {
   showModal,
   closePopup,
-  showFullscreenImage,
   closePopupESC,
 };

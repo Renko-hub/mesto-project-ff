@@ -1,10 +1,9 @@
 // card.js
 
-// Элементы интерфейса
+// Элемент шаблона карточки
 const cardTemplate = document.querySelector('#card-template');
-const placesList = document.querySelector('.places__list');
 
-// Функция создания одной карточки
+// Функция создания карточки
 function createCard({ name, link }, onClick) {
   const element = cardTemplate.content.cloneNode(true).firstElementChild;
   const imageCard = element.querySelector('.card__image');
@@ -16,7 +15,7 @@ function createCard({ name, link }, onClick) {
   imageCard.alt = name;
   titleCard.textContent = name;
 
-  // Регистрация обработчиков событий
+  // Назначаем обработчики событий
   imageCard.addEventListener('click', () => onClick(link, name));
   likeButton.addEventListener('click', () => toggleLike(likeButton));
   deleteButton.addEventListener('click', () => removeCard(element));
@@ -24,33 +23,19 @@ function createCard({ name, link }, onClick) {
   return element;
 }
 
-// Переключение лайка
+// Переключает статус лайка
 function toggleLike(buttonElement) {
   buttonElement.classList.toggle('card__like-button_is-active');
 }
 
-// Удаление карточки
+// Удаляет карточку
 function removeCard(cardElement) {
   cardElement.remove();
 }
 
-// Рендеринг начальных карточек
-function renderInitialCards(cards, onClick) {
-  cards.forEach((data) => placesList.append(createCard(data, onClick)));
-}
-
-// Загрузка данных пользователя в форму
-function loadUserDataToForm(name, description) {
-  const formElements = document.forms['edit-profile'].elements;
-  formElements.name.value = name;
-  formElements.description.value = description;
-}
-
-// Экспорт публичных методов
+// Экспорт нужных функций
 export {
   createCard,
   toggleLike,
   removeCard,
-  renderInitialCards,
-  loadUserDataToForm,
 };
