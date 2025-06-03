@@ -89,7 +89,7 @@ function handleAddNewPlace(evt) {
 // Объединяем обработку закрытия окон по нажатию на оверлей и кнопки закрытия
 popups.forEach((popup) => {
   // Обработчик клика на весь попап
-  popup.addEventListener('mousedown', (event) => {
+  popup.addEventListener('click', (event) => {
     if (event.target === popup) { // Если кликнули именно на оверлей
       Modal.closePopup(popup);
     }
@@ -98,7 +98,7 @@ popups.forEach((popup) => {
   // Добавляем слушатель на саму кнопку закрытия
   const closeButton = popup.querySelector('.popup__close');
   if (closeButton) {
-    closeButton.addEventListener('mousedown', () => {
+    closeButton.addEventListener('click', () => {
       Modal.closePopup(popup);
     });
   }
