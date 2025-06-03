@@ -89,7 +89,7 @@ function handleAddNewPlace(evt) {
 // Объединяем обработку закрытия окон по нажатию на оверлей и кнопки закрытия
 popups.forEach((popup) => {
   // Обработчик клика на весь попап
-  popup.addEventListener('click', (event) => {
+  popup.addEventListener('pointerdown', (event) => {
     if (event.target === popup) { // Если кликнули именно на оверлей
       Modal.closePopup(popup);
     }
