@@ -1,5 +1,3 @@
-// index.js
-
 // Импортируем стили и массив карточек
 import './index.css';
 import { initialCards } from '../components/cards.js';
@@ -25,6 +23,9 @@ const descriptionProfile = document.querySelector('.profile__description');
 // Элементы создания форм
 const profileEditButton = document.querySelector('.profile__edit-button');
 const addPlaceButton = document.querySelector('.profile__add-button');
+
+// Получаем ВСЕ элементы попапов
+const popups = document.querySelectorAll('.popup');
 
 // Вспомогательная функция для загрузки данных пользователя в форму
 function loadUserDataToForm(name, description) {
@@ -58,7 +59,7 @@ function openAddCard() {
 }
 
 // Обработка отправки формы редактирования профиля
-function handleEdit(evt) {
+function handleEditProfile(evt) {
   evt.preventDefault();
   const updatedTitle = formEditProfile.elements['name'].value.trim();
   const updatedDescription = formEditProfile.elements['description'].value.trim();
@@ -85,6 +86,24 @@ function handleAddNewPlace(evt) {
   Modal.closePopup(addNewCardPopup);
 }
 
+// Объединяем обработку закрытия окон по нажатию на оверлей и кнопки закрытия
+popups.forEach((popup) => {
+  // Обработчик клика на весь попап
+  popup.addEventListener('click', (event) => {
+    if (event.target === popup) { // Если кликнули именно на оверлей
+      Modal.closePopup(popup);
+    }
+  });
+
+  // Добавляем слушатель на саму кнопку закрытия
+  const closeButton = popup.querySelector('.popup__close');
+  if (closeButton) {
+    closeButton.addEventListener('click', () => {
+      Modal.closePopup(popup);
+    });
+  }
+});
+
 // Основное событие загрузки DOM
 document.addEventListener('DOMContentLoaded', () => {
   // Рендерим начальные карточки
@@ -94,27 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
   profileEditButton.addEventListener('click', openEditProfile);
   addPlaceButton.addEventListener('click', openAddCard);
 
-  formEditProfile.addEventListener('submit', handleEdit);
+  formEditProfile.addEventListener('submit', handleEditProfile); 
   formAddNewPlace.addEventListener('submit', handleAddNewPlace);
-
-  // Закрытие окна по оверлею
-  const popups = document.querySelectorAll('.popup');
-  popups.forEach((popup) => {
-    popup.addEventListener('click', (event) => {
-      if (event.type === 'click' && event.target === popup) {
-        Modal.closePopup(popup);
-      }
-    });
-  });
-
-  // Закрытие окна по кнопкам
-  const closeButtons = document.querySelectorAll('.popup__close');
-  closeButtons.forEach((button) => {
-    button.addEventListener('click', (event) => {
-      const popup = event.target.closest('.popup');
-      if (popup) {
-        Modal.closePopup(popup);
-      }
-    });
-  });
 });

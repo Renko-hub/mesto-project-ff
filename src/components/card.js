@@ -33,7 +33,7 @@ function removeCard(cardElement) {
   cardElement.remove();
 }
 
-// Экспорт нужных функций
+// Экспорт функций
 export {
   createCard,
   toggleLike,

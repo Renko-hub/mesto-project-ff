@@ -32,7 +32,7 @@ function closePopupESC(event) {
   }
 }
 
-// Экспортируем публичные функции
+// Экспорт функций
 export {
   showModal,
   closePopup,
