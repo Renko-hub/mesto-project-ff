@@ -98,7 +98,7 @@ popups.forEach((popup) => {
   // Добавляем слушатель на саму кнопку закрытия
   const closeButton = popup.querySelector('.popup__close');
   if (closeButton) {
-    closeButton.addEventListener('click', () => {
+    closeButton.addEventListener('pointerdown', () => {
       Modal.closePopup(popup);
     });
   }
@@ -110,8 +110,8 @@ document.addEventListener('DOMContentLoaded', () => {
   renderInitialCards(initialCards, showFullscreenImage);
 
   // Настраиваем обработчики событий
-  profileEditButton.addEventListener('click', openEditProfile);
-  addPlaceButton.addEventListener('click', openAddCard);
+  profileEditButton.addEventListener('pointerdown', openEditProfile);
+  addPlaceButton.addEventListener('pointerdown', openAddCard);
 
   formEditProfile.addEventListener('submit', handleEditProfile); 
   formAddNewPlace.addEventListener('submit', handleAddNewPlace);
