@@ -8,7 +8,7 @@ import { initialCards } from '../components/cards.js';
 import * as Card from '../components/card.js';
 import * as Modal from '../components/modal.js';
 
-// Главный сценарий после загрузки DOM
+// Запуск сценария после полной загрузки DOM
 document.addEventListener('DOMContentLoaded', () => {
   // Элементы интерфейса
   const buttonEditProfile = document.querySelector('.profile__edit-button');
@@ -19,50 +19,69 @@ document.addEventListener('DOMContentLoaded', () => {
   const descriptionProfile = document.querySelector('.profile__description');
 
   // Рендерим начальные карточки
-  Card.renderInitialCards(initialCards, Modal.openFullImage); // передаем callback
+  Card.renderInitialCards(initialCards, Modal.showFullscreenImage);
 
   // Открытие окна редактирования профиля
   buttonEditProfile.addEventListener('click', () => {
     Card.loadUserDataToForm(titleProfile.textContent, descriptionProfile.textContent);
-    Modal.openEditProfilePopup();
+    Modal.showModal(document.querySelector('.popup.popup_type_edit'));
   });
 
   // Открытие окна добавления карточки
   buttonAddPlace.addEventListener('click', () => {
-    Modal.openAddNewPlacePopup();
+    Modal.showModal(document.querySelector('.popup.popup_type_new-card'));
   });
 
-  // Отправка формы редактирования профиля
+  // Обработчик отправки формы редактирования профиля
   function handleEditFormSubmit(evt) {
     evt.preventDefault();
-    let updatedTitle = formEditProfile.elements['name'].value.trim();
-    let updatedDescription = formEditProfile.elements['description'].value.trim();
+    const updatedTitle = formEditProfile.elements['name'].value.trim();
+    const updatedDescription = formEditProfile.elements['description'].value.trim();
 
     titleProfile.textContent = updatedTitle;
     descriptionProfile.textContent = updatedDescription;
-    Modal.closePopup();
+
+    Modal.closePopup(document.querySelector('.popup.popup_type_edit'));
   }
 
-  // Добавление новой карточки
+  // Обработчик отправки формы добавления карточки
   function handleAddNewPlaceFormSubmit(evt) {
     evt.preventDefault();
-    let placeName = formAddNewPlace.elements['place-name'].value.trim();
-    let linkURL = formAddNewPlace.elements['link'].value.trim();
+    const placeName = formAddNewPlace.elements['place-name'].value.trim();
+    const linkURL = formAddNewPlace.elements['link'].value.trim();
 
     if (!placeName || !linkURL) return;
 
     const newCardData = { name: placeName, link: linkURL };
-    const newCard = Card.createCard(newCardData, Modal.openFullImage); // передаем callback
+    const newCard = Card.createCard(newCardData, Modal.showFullscreenImage);
     document.querySelector('.places__list').prepend(newCard);
 
     formAddNewPlace.reset();
-    Modal.closePopup();
+    Modal.closePopup(document.querySelector('.popup.popup_type_new-card'));
   }
 
-  // Назначаем обработчики форм
+  // Обработчики форм
   formEditProfile.addEventListener('submit', handleEditFormSubmit);
   formAddNewPlace.addEventListener('submit', handleAddNewPlaceFormSubmit);
 
-  // Обработчик кликов по оверлею
-  document.addEventListener('click', Modal.handleOverlayClick);
+  // Обработка закрытия окна по оверлею
+  const popups = document.querySelectorAll('.popup');
+  popups.forEach((popup) => {
+    popup.addEventListener('click', (event) => {
+      if (event.target === popup) {
+        Modal.closePopup(popup);
+      }
+    });
+  });
+
+  // Обработчики для кнопок закрытия
+  const closeButtons = document.querySelectorAll('.popup__close');
+  closeButtons.forEach((button) => {
+    button.addEventListener('click', (event) => {
+      const popup = event.target.closest('.popup');
+      if (popup) {
+        Modal.closePopup(popup);
+      }
+    });
+  });
 });
