@@ -1,8 +1,0 @@
-<svg width="200" height="100" xmlns="http://www.w3.org/2000/svg">
-  <text x="50%" y="20%" text-anchor="middle" font-size="4pt" fill="#666">Ошибка загрузки</text>
-  <text x="50%" y="30%" text-anchor="middle" font-size="4pt" fill="#666">изображения.</text>
-  <text x="50%" y="45%" text-anchor="middle" font-size="4pt" fill="#666">Нужен формат:</text>
-  <text x="50%" y="55%" text-anchor="middle" font-size="4pt" fill="#666">JPG, JPEG, PNG,</text>
-  <text x="50%" y="65%" text-anchor="middle" font-size="4pt" fill="#666">GIF, SVG, WEBP,</text>
-  <text x="50%" y="75%" text-anchor="middle" font-size="4pt" fill="#666">TIFF</text>
-</svg>  
