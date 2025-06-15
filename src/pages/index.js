@@ -30,14 +30,6 @@ const editProfileBtn = document.querySelector('.profile__edit-button');    // Р
 const addPlaceBtn = document.querySelector('.profile__add-button');        // Добавить новое место
 const profileImage = document.querySelector('.profile__image');            // Аватар профиля
 
-// Глобальная переменная хранения временной ссылки на аватар
-let tempAvatarUrl = localStorage.getItem('tempAvatarUrl');
-
-// Применение временного аватара, если он есть
-if (tempAvatarUrl) {
-  profileImage.style.backgroundImage = `url(${tempAvatarUrl})`;
-}
-
 // Вспомогательные функции
 
 // Загрузка профайл-данных в форму редактирования
@@ -67,8 +59,10 @@ function renderInitialCards(userInfo, cards, onClick, currentUserId) {
     descriptionProfile.textContent = userInfo.about;
   }
 
+  // Проходим по всем карточкам и создаем их элементы
   cards.forEach((data) => {
-    placesList.append(Card.createCard(data, showFullscreenImage, currentUserId));
+    const cardElement = Card.createCard(data, onClick, currentUserId);
+    placesList.append(cardElement); // Добавляем карточку в список
   });
 }
 
@@ -78,7 +72,8 @@ function updateUserAvatar(avatarUrl) {
     .then(updatedUserInfo => {
       if (profileImage) {
         profileImage.style.backgroundImage = `url(${updatedUserInfo.avatar})`;
-        localStorage.setItem('tempAvatarUrl', updatedUserInfo.avatar);
+        // Сохраняем новый аватар в localStorage
+        localStorage.setItem('avatar', updatedUserInfo.avatar);
       }
     });
 }
@@ -113,6 +108,10 @@ function handleEditProfile(evt) {
         titleProfile.textContent = updatedUserInfo.name;
         descriptionProfile.textContent = updatedUserInfo.about;
 
+        // Сохраняем данные в localStorage
+        localStorage.setItem('name', updatedUserInfo.name);
+        localStorage.setItem('about', updatedUserInfo.about);
+
         // Возвращаем кнопку в обычное состояние
         Modal.manageButtonState(submitButton, false);
 
@@ -122,7 +121,7 @@ function handleEditProfile(evt) {
       .catch(() => {
         Modal.manageButtonState(submitButton, false);
       });
-  }, 800); // Задержка в 0.8 секунд
+  }, 800); // Задержка в 0.8 секунды
 }
 
 // Создание новой карточки
@@ -155,7 +154,7 @@ function handleAddNewPlace(evt) {
       .catch(() => {
         Modal.manageButtonState(submitButton, false);
       });
-  }, 800); // Задержка в 0.8 секунд
+  }, 800); // Задержка в 0.8 секунды
 }
 
 // Обновление аватара пользователя
@@ -186,7 +185,7 @@ function handleChangeAvatar(evt) {
       .catch(() => {
         Modal.manageButtonState(submitButton, false);
       });
-  }, 800); // Задержка в 0.8 секунд
+  }, 800); // Задержка в 0.8 секунды
 }
 
 // Основная логика приложения
@@ -194,6 +193,25 @@ Promise.all([Api.getUserInfo(), Api.getInitialCards()])
   .then(([userInfo, cards]) => {
     // Получаем currentUserId и сохраняем его в глобальном пространстве
     window.currentUserId = userInfo._id;
+
+    // Проверяем, было ли это первое посещение
+    const firstVisitKey = 'firstVisit';
+    const isFirstVisit = localStorage.getItem(firstVisitKey) === null;
+
+    // Устанавливаем ключ firstVisit, чтобы больше не воспринимать следующие посещения как первые
+    if (isFirstVisit) {
+      localStorage.setItem(firstVisitKey, 'false');
+    }
+
+    // Определяем, какую информацию выводить при первом посещении
+    const initialName = isFirstVisit ? 'Жак-Ив Кусто' : localStorage.getItem('name') || '';
+    const initialAbout = isFirstVisit ? 'Исследователь океана' : localStorage.getItem('about') || '';
+    const initialAvatar = isFirstVisit ? '/src/images/avatar.jpg' : localStorage.getItem('avatar') || '';
+
+    // Отображаем соответствующую информацию
+    titleProfile.textContent = initialName;
+    descriptionProfile.textContent = initialAbout;
+    profileImage.style.backgroundImage = `url(${initialAvatar})`;
 
     // Рендерим стартовые карточки
     renderInitialCards(userInfo, cards, showFullscreenImage, window.currentUserId);
@@ -238,7 +256,7 @@ function handleRemoveCard(evt) {
 function handleDeleteConfirmation(cardId, cardElement) {
   Api.deleteCard(cardId)
     .then(() => {
-      cardElement.remove(); // Убираем элемент из DOM
+      cardElement.remove(); // Удаляем элемент из DOM
       Modal.closePopup(deleteConfirmPopup); // Закрываем модал
     })
     .catch(() => {});

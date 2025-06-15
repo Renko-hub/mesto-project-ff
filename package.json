@@ -1,7 +1,7 @@
 {
   "name": "mesto-project-ff-main",
   "version": "1.0.0",
-  "description": "https://github.com/Renko-hub/mesto-project-ff",
+  "description": "First JS Project",
   "main": "index.js",
   "scripts": {
     "build": "webpack --mode production",
