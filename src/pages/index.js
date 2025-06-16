@@ -1,34 +1,34 @@
 // index.js
 
-// Импортируем модули и необходимые компоненты
-import './index.css';                         // Подключаем файл стилей
-import * as Api from '../components/api';     // Модуль API-запросов
-import * as Card from '../components/card';   // Работа с карточками
+// Импортируем стили и модули
+import './index.css';                       // Подключаем файл стилей
+import * as Api from '../components/api';   // Модуль API-запросов
+import * as Card from '../components/card'; // Работа с карточками
 import * as Modal from '../components/modal'; // Работа с модальными окнами
 import * as Validation from '../components/validation'; // Валидаторы форм
 
-// Кэширование важных элементов страницы
-const placesList = document.querySelector('.places__list');                // Список мест
-const editPopup = document.querySelector('.popup.popup_type_edit');        // Поп-ап редактирования профиля
+// Кэширование нужных элементов страницы
+const placesList = document.querySelector('.places__list');               // Контейнер карточек
+const editPopup = document.querySelector('.popup.popup_type_edit');       // Поп-ап редактирования профиля
 const addNewCardPopup = document.querySelector('.popup.popup_type_new-card'); // Поп-ап добавления карточки
-const viewImagePopup = document.querySelector('.popup.popup_type_image');  // Поп-ап просмотра фото
-const viewImage = viewImagePopup.querySelector('.popup__image');           // Изображение внутри попапа
-const caption = viewImagePopup.querySelector('.popup__caption');           // Подпись к изображению
+const viewImagePopup = document.querySelector('.popup.popup_type_image'); // Поп-ап просмотра фото
+const viewImage = viewImagePopup.querySelector('.popup__image');          // Изображение в поп-апе
+const caption = viewImagePopup.querySelector('.popup__caption');          // Подпись к изображению
 const deleteConfirmPopup = document.querySelector('.popup.popup_type_delete-confirm'); // Окно подтверждения удаления
 
-// Кэширование форм
-const editProfileForm = document.forms['edit-profile'];                   // Форма редактирования профиля
-const addNewPlaceForm = document.forms['new-place'];                      // Форма добавления места
+// Формы
+const editProfileForm = document.forms['edit-profile'];                  // Форма редактирования профиля
+const addNewPlaceForm = document.forms['new-place'];                     // Форма добавления карточки
 const changeAvatarForm = document.forms['change-avatar-form'];           // Форма изменения аватара
 
-// Элементы профиля
-const titleProfile = document.querySelector('.profile__title');            // Название профиля
+// Профильные элементы
+const titleProfile = document.querySelector('.profile__title');           // Заголовок профиля
 const descriptionProfile = document.querySelector('.profile__description'); // Описание профиля
+const profileImage = document.querySelector('.profile__image');           // Аватар профиля
 
 // Кнопки
-const editProfileBtn = document.querySelector('.profile__edit-button');    // Редактировать профиль
-const addPlaceBtn = document.querySelector('.profile__add-button');        // Добавить новое место
-const profileImage = document.querySelector('.profile__image');            // Аватар профиля
+const editProfileBtn = document.querySelector('.profile__edit-button');   // Кнопка редактирования профиля
+const addPlaceBtn = document.querySelector('.profile__add-button');       // Кнопка добавления карточки
 
 // Вспомогательные функции
 
@@ -78,6 +78,15 @@ function updateUserAvatar(avatarUrl) {
     });
 }
 
+// Функция сохранения данных в localStorage
+function saveUserData() {
+  localStorage.setItem('user-data', JSON.stringify({
+    name: titleProfile.textContent,
+    about: descriptionProfile.textContent,
+    avatar: profileImage.style.backgroundImage.replace(/^url$['"]?(.*?)['"]?$$/, '$1')
+  }));
+}
+
 // Открытие окна редактирования профиля
 function openEditProfile() {
   loadUserDataToForm(titleProfile.textContent, descriptionProfile.textContent);
@@ -99,18 +108,17 @@ function handleEditProfile(evt) {
   // Блокируем кнопку и меняем текст
   Modal.manageButtonState(submitButton, true);
 
-  setTimeout(() => { // Задержка
+  setTimeout(function() { // Задержка
     const updatedTitle = formElements.name.value.trim();
     const updatedDescription = formElements.description.value.trim();
 
     Api.updateUserInfo({ name: updatedTitle, about: updatedDescription })
-      .then(updatedUserInfo => {
+      .then(function(updatedUserInfo) {
         titleProfile.textContent = updatedUserInfo.name;
         descriptionProfile.textContent = updatedUserInfo.about;
 
         // Сохраняем данные в localStorage
-        localStorage.setItem('name', updatedUserInfo.name);
-        localStorage.setItem('about', updatedUserInfo.about);
+        saveUserData();
 
         // Возвращаем кнопку в обычное состояние
         Modal.manageButtonState(submitButton, false);
@@ -118,7 +126,7 @@ function handleEditProfile(evt) {
         editProfileForm.reset();
         Modal.closePopup(editPopup);
       })
-      .catch(() => {
+      .catch(function() {
         Modal.manageButtonState(submitButton, false);
       });
   }, 800); // Задержка в 0.8 секунды
@@ -134,14 +142,14 @@ function handleAddNewPlace(evt) {
   // Блокируем кнопку и меняем текст
   Modal.manageButtonState(submitButton, true);
 
-  setTimeout(() => { // Задержка
+  setTimeout(function() { // Задержка
     const placeName = formElements['place-name'].value.trim();
     const linkURL = formElements.link.value.trim();
 
     if (!placeName || !linkURL) return;
 
     Api.createCard({ name: placeName, link: linkURL })
-      .then(newCard => {
+      .then(function(newCard) {
         const newCardElement = Card.createCard(newCard, showFullscreenImage, currentUserId);
         placesList.prepend(newCardElement); // Добавляем карточку вверх списка
 
@@ -151,7 +159,7 @@ function handleAddNewPlace(evt) {
         Modal.closePopup(addNewCardPopup);
         addNewPlaceForm.reset();
       })
-      .catch(() => {
+      .catch(function() {
         Modal.manageButtonState(submitButton, false);
       });
   }, 800); // Задержка в 0.8 секунды
@@ -167,7 +175,7 @@ function handleChangeAvatar(evt) {
   // Блокируем кнопку и меняем текст
   Modal.manageButtonState(submitButton, true);
 
-  setTimeout(() => { // Задержка 
+  setTimeout(function() { // Задержка 
     const avatarUrl = form.link.value.trim();
 
     if (!avatarUrl) {
@@ -177,49 +185,67 @@ function handleChangeAvatar(evt) {
     }
 
     updateUserAvatar(avatarUrl)
-      .then(() => {
+      .then(function() {
         Modal.manageButtonState(submitButton, false);
         Modal.closePopup(document.querySelector('.popup.popup_type_change-avatar'));
         form.reset();
+
+        // Сохраняем данные в localStorage
+        saveUserData();
       })
-      .catch(() => {
+      .catch(function() {
         Modal.manageButtonState(submitButton, false);
       });
   }, 800); // Задержка в 0.8 секунды
 }
 
 // Основная логика приложения
-Promise.all([Api.getUserInfo(), Api.getInitialCards()])
-  .then(([userInfo, cards]) => {
-    // Получаем currentUserId и сохраняем его в глобальном пространстве
-    window.currentUserId = userInfo._id;
+Promise.all([
+  Api.getUserInfo(),
+  Api.getInitialCards()
+])
+.then(function([userInfo, cards]) {
+  // Получаем currentUserId и сохраняем его в глобальном пространстве
+  window.currentUserId = userInfo._id;
 
-    // Проверяем, было ли это первое посещение
-    const firstVisitKey = 'firstVisit';
-    const isFirstVisit = localStorage.getItem(firstVisitKey) === null;
+  // Проверяем, было ли это первое посещение
+  const firstVisitKey = 'firstVisit';
+  const isFirstVisit = localStorage.getItem(firstVisitKey) === null;
 
-    // Устанавливаем ключ firstVisit, чтобы больше не воспринимать следующие посещения как первые
-    if (isFirstVisit) {
-      localStorage.setItem(firstVisitKey, 'false');
-    }
+  // Устанавливаем ключ firstVisit, чтобы больше не воспринимать следующие посещения как первые
+  if (isFirstVisit) {
+    localStorage.setItem(firstVisitKey, 'false');
+  }
 
-    // Определяем, какую информацию выводить при первом посещении
-    const initialName = isFirstVisit ? 'Жак-Ив Кусто' : localStorage.getItem('name') || '';
-    const initialAbout = isFirstVisit ? 'Исследователь океана' : localStorage.getItem('about') || '';
-    const initialAvatar = isFirstVisit ? '/src/images/avatar.jpg' : localStorage.getItem('avatar') || '';
+  // Определяем, какую информацию выводить при первом посещении
+  const initialName = isFirstVisit ? 'Жак-Ив Кусто' : localStorage.getItem('name') || '';
+  const initialAbout = isFirstVisit ? 'Исследователь океана' : localStorage.getItem('about') || '';
+  const initialAvatar = isFirstVisit ? '/src/images/avatar.jpg' : localStorage.getItem('avatar') || '';
 
-    // Отображаем соответствующую информацию
-    titleProfile.textContent = initialName;
-    descriptionProfile.textContent = initialAbout;
-    profileImage.style.backgroundImage = `url(${initialAvatar})`;
+  // Отображаем соответствующую информацию
+  titleProfile.textContent = initialName;
+  descriptionProfile.textContent = initialAbout;
+  profileImage.style.backgroundImage = `url(${initialAvatar})`;
 
-    // Рендерим стартовые карточки
-    renderInitialCards(userInfo, cards, showFullscreenImage, window.currentUserId);
-  })
-  .catch(() => {});
+  // Рендерим стартовые карточки
+  renderInitialCards(userInfo, cards, showFullscreenImage, window.currentUserId);
+})
+.catch(function() {});
+
+// Обработка закрытия страницы
+window.onbeforeunload = function() {
+  // Отправляем запрос на сервер для восстановления стандартных данных
+  Api.updateUserInfo({ name: 'Жак-Ив Кусто', about: 'Исследователь океана', avatar: '' })
+    .then(function() {
+      localStorage.clear(); // Очищаем localStorage
+    })
+    .catch(function(err) {
+      console.error('Ошибка при обработке закрытия страницы:', err);
+    });
+};
 
 // Регистрация слушателей событий
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
   editProfileBtn.addEventListener('pointerdown', openEditProfile);
   addPlaceBtn.addEventListener('pointerdown', openAddCard);
 
@@ -231,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Регистрируем событие удаления карточки
   document.addEventListener('click', handleRemoveCard);
 
-  profileImage.addEventListener('pointerdown', () => {
+  profileImage.addEventListener('pointerdown', function() {
     Modal.openModalWindow(document.querySelector('.popup.popup_type_change-avatar'));
   });
 
@@ -246,7 +272,9 @@ function handleRemoveCard(evt) {
   if (parentCard && target.classList.contains('card__delete-button')) {
     const cardId = parentCard.dataset.id;
     Modal.openModalWindow(deleteConfirmPopup, {
-      handleAction: () => handleDeleteConfirmation(cardId, parentCard),
+      handleAction: function() {
+        handleDeleteConfirmation(cardId, parentCard);
+      },
       confirmButtonSelector: '.popup__button_confirm'
     });
   }
@@ -255,9 +283,9 @@ function handleRemoveCard(evt) {
 // Обработчик удаления карточки
 function handleDeleteConfirmation(cardId, cardElement) {
   Api.deleteCard(cardId)
-    .then(() => {
+    .then(function() {
       cardElement.remove(); // Удаляем элемент из DOM
       Modal.closePopup(deleteConfirmPopup); // Закрываем модал
     })
-    .catch(() => {});
+    .catch(function() {});
 }
