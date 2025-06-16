@@ -168,12 +168,12 @@ function handleChangeAvatar(evt) {
 
 // Основная логика приложения
 Promise.all([
-  Api.getUserInfo(),                                // ⚡️ Добавлено получение информации о пользователе
+  Api.getUserInfo(),                                // Добавлено получение информации о пользователе
   Api.getInitialCards()
 ])
 .then(function ([userInfo, cards]) {
   // Получаем currentUserId и сохраняем его в глобальном пространстве
-  window.currentUserId = userInfo._id;             // ⚡️ Теперь получаем ID пользователя здесь
+  window.currentUserId = userInfo._id;             // Теперь получаем ID пользователя здесь
 
   // Проверяем, есть ли локальные данные пользователя
   let cachedUserData = localStorage.getItem('user-data');
@@ -206,8 +206,7 @@ Promise.all([
 
   // Рендерим начальные карточки
   renderInitialCards(cards, showFullscreenImage, window.currentUserId);
-})
-.catch(function () {});
+}); // <--- ДОБАВЬ ТОЧКУ С ЗАПЯТОЙ ТУТ!!!
 
 // Регистрация слушателей событий
 document.addEventListener('DOMContentLoaded', function () {
