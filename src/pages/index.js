@@ -1,13 +1,13 @@
 // Импортируем стили и модули
-import './index.css';                       // Подключаем файл стилей
-import * as Api from '../components/api';   // Модуль API-запросов
-import * as Card from '../components/card'; // Работа с карточками
+import './index.css';                        // Подключаем файл стилей
+import * as Api from '../components/api';    // Модуль API-запросов
+import * as Card from '../components/card';  // Работа с карточками
 import * as Modal from '../components/modal'; // Работа с модальными окнами
 import * as Validation from '../components/validation'; // Валидаторы форм
 
 // Кэширование нужных элементов страницы
-const placesList = document.querySelector('.places__list');               // Контейнер карточек
-const editPopup = document.querySelector('.popup.popup_type_edit');       // Поп-ап редактирования профиля
+const placesList = document.querySelector('.places__list');                // Контейнер карточек
+const editPopup = document.querySelector('.popup.popup_type_edit');        // Поп-ап редактирования профиля
 const addNewCardPopup = document.querySelector('.popup.popup_type_new-card'); // Поп-ап добавления карточки
 const viewImagePopup = document.querySelector('.popup.popup_type_image'); // Поп-ап просмотра фото
 const viewImage = viewImagePopup.querySelector('.popup__image');          // Изображение в поп-апе
@@ -15,18 +15,18 @@ const caption = viewImagePopup.querySelector('.popup__caption');          // П�
 const deleteConfirmPopup = document.querySelector('.popup.popup_type_delete-confirm'); // Окно подтверждения удаления
 
 // Формы
-const editProfileForm = document.forms['edit-profile'];                  // Форма редактирования профиля
-const addNewPlaceForm = document.forms['new-place'];                     // Форма добавления карточки
-const changeAvatarForm = document.forms['change-avatar-form'];           // Форма изменения аватара
+const editProfileForm = document.forms['edit-profile'];                   // Форма редактирования профиля
+const addNewPlaceForm = document.forms['new-place'];                      // Форма добавления карточки
+const changeAvatarForm = document.forms['change-avatar-form'];            // Форма изменения аватара
 
 // Профильные элементы
-const titleProfile = document.querySelector('.profile__title');           // Заголовок профиля
+const titleProfile = document.querySelector('.profile__title');            // Заголовок профиля
 const descriptionProfile = document.querySelector('.profile__description'); // Описание профиля
-const profileImage = document.querySelector('.profile__image');           // Аватар профиля
+const profileImage = document.querySelector('.profile__image');            // Аватар профиля
 
 // Кнопки
-const editProfileBtn = document.querySelector('.profile__edit-button');   // Кнопка редактирования профиля
-const addPlaceBtn = document.querySelector('.profile__add-button');       // Кнопка добавления карточки
+const editProfileBtn = document.querySelector('.profile__edit-button');    // Кнопка редактирования профиля
+const addPlaceBtn = document.querySelector('.profile__add-button');        // Кнопка добавления карточки
 
 // Вспомогательные функции
 
@@ -81,7 +81,7 @@ function saveUserData() {
   localStorage.setItem('user-data', JSON.stringify({
     name: titleProfile.textContent,
     about: descriptionProfile.textContent,
-    avatar: profileImage.style.backgroundImage.match(/url$([^)]+)$/) ?
+    avatar: profileImage.style.backgroundImage.match(/url$"?(.*?)"?$/) ?
             RegExp.$1.replace(/["']/g, '') :
             ''
   }));
@@ -199,24 +199,28 @@ Promise.all([
   // Получаем currentUserId и сохраняем его в глобальном пространстве
   window.currentUserId = userInfo._id;
 
-  // Проверяем, было ли это первое посещение
+  // Определяем, является ли это первый визит
   const firstVisitKey = 'firstVisit';
-  const isFirstVisit = localStorage.getItem(firstVisitKey) === null;
+  let isFirstVisit = localStorage.getItem(firstVisitKey) !== 'false';
 
-  // Устанавливаем ключ firstVisit, чтобы больше не воспринимать следующие посещения как первые
   if (isFirstVisit) {
-    localStorage.setItem(firstVisitKey, 'false');
+    // Используем дефолтные значения при первом визите
+    const defaultValues = { name: 'Жак-Ив Кусто', about: 'Исследователь океана', avatar: '/src/images/avatar.jpg'};
+    Object.assign(localStorage, defaultValues);
+    localStorage.setItem(firstVisitKey, 'false'); // устанавливаем значение "не первый визит"
   }
 
-  // Определяем, какую информацию выводить при первом посещении
-  const initialName = isFirstVisit ? 'Жак-Ив Кусто' : localStorage.getItem('name') || '';
-  const initialAbout = isFirstVisit ? 'Исследователь океана' : localStorage.getItem('about') || '';
-  const initialAvatar = isFirstVisit ? '/src/images/avatar.jpg' : localStorage.getItem('avatar') || '';
+  // Применяем данные пользователя
+  titleProfile.textContent = userInfo.name || localStorage.getItem('name');
+  descriptionProfile.textContent = userInfo.about || localStorage.getItem('about');
 
-  // Отображаем соответствующую информацию
-  titleProfile.textContent = initialName;
-  descriptionProfile.textContent = initialAbout;
-  profileImage.style.backgroundImage = `url(${initialAvatar})`;
+  // Проверяем наличие аватара и задаём его
+  if (userInfo.avatar) {
+    profileImage.style.backgroundImage = `url(${userInfo.avatar})`;
+    localStorage.setItem('avatar', userInfo.avatar);
+  } else if (localStorage.getItem('avatar')) {
+    profileImage.style.backgroundImage = `url(${localStorage.getItem('avatar')})`;
+  }
 
   // Рендерим стартовые карточки
   renderInitialCards(userInfo, cards, showFullscreenImage, window.currentUserId);
@@ -225,14 +229,10 @@ Promise.all([
 
 // Обработка закрытия страницы
 window.onbeforeunload = function() {
-  // Отправляем запрос на сервер для восстановления стандартных данных
-  Api.updateUserInfo({ name: 'Жак-Ив Кусто', about: 'Исследователь океана', avatar: '' })
-    .then(function() {
-      localStorage.clear(); // Очищаем localStorage
-    })
-    .catch(function(err) {
-      console.error('Ошибка при обработке закрытия страницы:', err);
-    });
+  // Только очищаем временный флаг первого визита
+  localStorage.removeItem('firstVisit');
+
+  // Остальные данные остаются сохраненными
 };
 
 // Регистрация слушателей событий
