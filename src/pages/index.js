@@ -1,5 +1,3 @@
-// index.js
-
 // Импортируем стили и модули
 import './index.css';                       // Подключаем файл стилей
 import * as Api from '../components/api';   // Модуль API-запросов
@@ -83,8 +81,27 @@ function saveUserData() {
   localStorage.setItem('user-data', JSON.stringify({
     name: titleProfile.textContent,
     about: descriptionProfile.textContent,
-    avatar: profileImage.style.backgroundImage.replace(/^url$['"]?(.*?)['"]?$$/, '$1')
+    avatar: profileImage.style.backgroundImage.match(/url$([^)]+)$/) ?
+            RegExp.$1.replace(/["']/g, '') :
+            ''
   }));
+}
+
+// Общие обработчики для кнопок
+function handleButtonWithDelay(button, action) {
+  // Сначала блокируем кнопку и меняем текст
+  Modal.manageButtonState(button, true);
+
+  // Ставим задержку в 800 мс
+  setTimeout(() => {
+    action().then(() => {
+      // Возвращаем кнопку в исходное состояние
+      Modal.manageButtonState(button, false);
+    }).catch(() => {
+      // В случае ошибки возвращаем кнопку в исходное состояние
+      Modal.manageButtonState(button, false);
+    });
+  }, 800); // Задержка в 0.8 секунды
 }
 
 // Открытие окна редактирования профиля
@@ -105,31 +122,23 @@ function handleEditProfile(evt) {
   const formElements = editProfileForm.elements;
   const submitButton = editProfileForm.querySelector('.popup__button[type="submit"]');
 
-  // Блокируем кнопку и меняем текст
-  Modal.manageButtonState(submitButton, true);
+  const updatedTitle = formElements.name.value.trim();
+  const updatedDescription = formElements.description.value.trim();
 
-  setTimeout(function() { // Задержка
-    const updatedTitle = formElements.name.value.trim();
-    const updatedDescription = formElements.description.value.trim();
-
+  // Действие с задержкой
+  handleButtonWithDelay(submitButton, () =>
     Api.updateUserInfo({ name: updatedTitle, about: updatedDescription })
-      .then(function(updatedUserInfo) {
+      .then(updatedUserInfo => {
         titleProfile.textContent = updatedUserInfo.name;
         descriptionProfile.textContent = updatedUserInfo.about;
 
         // Сохраняем данные в localStorage
         saveUserData();
 
-        // Возвращаем кнопку в обычное состояние
-        Modal.manageButtonState(submitButton, false);
-
         editProfileForm.reset();
         Modal.closePopup(editPopup);
       })
-      .catch(function() {
-        Modal.manageButtonState(submitButton, false);
-      });
-  }, 800); // Задержка в 0.8 секунды
+  );
 }
 
 // Создание новой карточки
@@ -139,30 +148,22 @@ function handleAddNewPlace(evt) {
   const formElements = addNewPlaceForm.elements;
   const submitButton = addNewPlaceForm.querySelector('.popup__button[type="submit"]');
 
-  // Блокируем кнопку и меняем текст
-  Modal.manageButtonState(submitButton, true);
+  const placeName = formElements['place-name'].value.trim();
+  const linkURL = formElements.link.value.trim();
 
-  setTimeout(function() { // Задержка
-    const placeName = formElements['place-name'].value.trim();
-    const linkURL = formElements.link.value.trim();
+  if (!placeName || !linkURL) return;
 
-    if (!placeName || !linkURL) return;
-
+  // Действие с задержкой
+  handleButtonWithDelay(submitButton, () =>
     Api.createCard({ name: placeName, link: linkURL })
-      .then(function(newCard) {
-        const newCardElement = Card.createCard(newCard, showFullscreenImage, currentUserId);
+      .then(newCard => {
+        const newCardElement = Card.createCard(newCard, showFullscreenImage, window.currentUserId);
         placesList.prepend(newCardElement); // Добавляем карточку вверх списка
-
-        // Возвращаем кнопку в обычное состояние
-        Modal.manageButtonState(submitButton, false);
 
         Modal.closePopup(addNewCardPopup);
         addNewPlaceForm.reset();
       })
-      .catch(function() {
-        Modal.manageButtonState(submitButton, false);
-      });
-  }, 800); // Задержка в 0.8 секунды
+  );
 }
 
 // Обновление аватара пользователя
@@ -172,31 +173,21 @@ function handleChangeAvatar(evt) {
   const form = evt.currentTarget;
   const submitButton = form.querySelector('.popup__button[type="submit"]');
 
-  // Блокируем кнопку и меняем текст
-  Modal.manageButtonState(submitButton, true);
+  const avatarUrl = form.link.value.trim();
 
-  setTimeout(function() { // Задержка 
-    const avatarUrl = form.link.value.trim();
+  if (!avatarUrl) return;
 
-    if (!avatarUrl) {
-      alert('Укажите ссылку на изображение.');
-      Modal.manageButtonState(submitButton, false);
-      return;
-    }
-
+  // Действие с задержкой
+  handleButtonWithDelay(submitButton, () =>
     updateUserAvatar(avatarUrl)
-      .then(function() {
-        Modal.manageButtonState(submitButton, false);
+      .then(() => {
         Modal.closePopup(document.querySelector('.popup.popup_type_change-avatar'));
         form.reset();
 
         // Сохраняем данные в localStorage
         saveUserData();
       })
-      .catch(function() {
-        Modal.manageButtonState(submitButton, false);
-      });
-  }, 800); // Задержка в 0.8 секунды
+  );
 }
 
 // Основная логика приложения
