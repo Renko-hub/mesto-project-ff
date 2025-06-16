@@ -1,3 +1,5 @@
+// index.js
+
 // Импортируем стили и модули
 import './index.css';                                      // Подключаем файл стилей
 import * as Api from '../components/api';                  // Модуль API-запросов
@@ -201,45 +203,45 @@ Promise.all([
   Api.getUserInfo(),
   Api.getInitialCards()
 ])
-.then(function([userInfo, cards]) {
-  // Получаем currentUserId и сохраняем его в глобальном пространстве
-  window.currentUserId = userInfo._id;
+  .then(function ([userInfo, cards]) {
+    // Получаем currentUserId и сохраняем его в глобальном пространстве
+    window.currentUserId = userInfo._id;
 
-  // Читаем кэшированные данные из localStorage
-  const cachedUserData = localStorage.getItem('user-data');
+    // Читаем кэшированные данные из localStorage
+    const cachedUserData = localStorage.getItem('user-data');
 
-  // Проверяем наличие данных в localStorage
-  if (cachedUserData) {
-    const parsedUserData = JSON.parse(cachedUserData);
-    titleProfile.textContent = parsedUserData.name;
-    descriptionProfile.textContent = parsedUserData.about;
+    // Проверяем наличие данных в localStorage
+    if (cachedUserData) {
+      const parsedUserData = JSON.parse(cachedUserData);
+      titleProfile.textContent = parsedUserData.name;
+      descriptionProfile.textContent = parsedUserData.about;
 
-    // Проверяем существование аватара и ставим фон
-    if (parsedUserData.avatar) {
-      profileImage.style.backgroundImage = `url("${parsedUserData.avatar}")`;
+      // Проверяем существование аватара и ставим фон
+      if (parsedUserData.avatar) {
+        profileImage.style.backgroundImage = `url("${parsedUserData.avatar}")`;
+      }
+    } else {
+      // Применяем данные по умолчанию ("Жак-Ив Кусто")
+      titleProfile.textContent = 'Жак-Ив Кусто';
+      descriptionProfile.textContent = 'Исследователь океана';
+      profileImage.style.backgroundImage = `url("/src/images/default_avatar.jpg")`;
+
+      // Сохраняем данные по умолчанию в localStorage
+      saveUserData();
     }
-  } else {
-    // Применяем данные по умолчанию ("Жак-Ив Кусто")
-    titleProfile.textContent = 'Жак-Ив Кусто';
-    descriptionProfile.textContent = 'Исследователь океана';
-    profileImage.style.backgroundImage = `url("/src/images/default_avatar.jpg")`;
 
-    // Сохраняем данные по умолчанию в localStorage
-    saveUserData();
-  }
-
-  // Рендерим стартовые карточки
-  renderInitialCards(userInfo, cards, showFullscreenImage, window.currentUserId);
-})
-.catch(function() {});
+    // Рендерим стартовые карточки
+    renderInitialCards(userInfo, cards, showFullscreenImage, window.currentUserId);
+  })
+  .catch(function () { });
 
 // Обработка закрытия страницы
-window.onbeforeunload = function() {
+window.onbeforeunload = function () {
   // Ничего не делаем специально при выгрузке страницы
 };
 
 // Регистрация слушателей событий
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   editProfileBtn.addEventListener('pointerdown', openEditProfile);
   addPlaceBtn.addEventListener('pointerdown', openAddCard);
 
@@ -251,7 +253,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Регистрируем событие удаления карточки
   document.addEventListener('click', handleRemoveCard);
 
-  profileImage.addEventListener('pointerdown', function() {
+  profileImage.addEventListener('pointerdown', function () {
     Modal.openModalWindow(document.querySelector('.popup.popup_type_change-avatar'));
   });
 
@@ -266,7 +268,7 @@ function handleRemoveCard(evt) {
   if (parentCard && target.classList.contains('card__delete-button')) {
     const cardId = parentCard.dataset.id;
     Modal.openModalWindow(deleteConfirmPopup, {
-      handleAction: function() {
+      handleAction: function () {
         handleDeleteConfirmation(cardId, parentCard);
       },
       confirmButtonSelector: '.popup__button_confirm'
@@ -277,11 +279,11 @@ function handleRemoveCard(evt) {
 // Обработчик удаления карточки
 function handleDeleteConfirmation(cardId, cardElement) {
   Api.deleteCard(cardId)
-    .then(function() {
+    .then(function () {
       cardElement.remove(); // Удаляем элемент из DOM
       Modal.closePopup(deleteConfirmPopup); // Закрываем модал
     })
-    .catch(function() {});
+    .catch(function () { });
 }
 
 // Приложим имя и описание из localStorage при загрузке страницы
@@ -298,7 +300,7 @@ const firstVisitKey = 'firstVisit';
 let isFirstVisit = localStorage.getItem(firstVisitKey) !== 'false';
 
 if (isFirstVisit) {
-  const defaultValues = { name: 'Жак-Ив Кусто', about: 'Исследователь океана', avatar: '/src/images/default_avatar.jpg'};
+  const defaultValues = { name: 'Жак-Ив Кусто', about: 'Исследователь океана', avatar: '/src/images/default_avatar.jpg' };
   Object.assign(localStorage, defaultValues);
   localStorage.setItem(firstVisitKey, 'false'); // Устанавливаем значение "не первый визит"
 }
