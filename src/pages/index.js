@@ -6,27 +6,27 @@ import * as Modal from '../components/modal';              // Работа с м
 import * as Validation from '../components/validation';    // Валидаторы форм
 
 // Кэширование нужных элементов страницы
-const placesList = document.querySelector('.places__list');                           // Контейнер карточек
-const editPopup = document.querySelector('.popup.popup_type_edit');                   // Поп-ап редактирования профиля
-const addNewCardPopup = document.querySelector('.popup.popup_type_new-card');         // Поп-ап добавления карточки
-const viewImagePopup = document.querySelector('.popup.popup_type_image');             // Поп-ап просмотра фото
-const viewImage = viewImagePopup.querySelector('.popup__image');                      // Изображение в поп-апе
-const caption = viewImagePopup.querySelector('.popup__caption');                      // Подпись к изображению
+const placesList = document.querySelector('.places__list');                   // Контейнер карточек
+const editPopup = document.querySelector('.popup.popup_type_edit');           // Поп-ап редактирования профиля
+const addNewCardPopup = document.querySelector('.popup.popup_type_new-card'); // Поп-ап добавления карточки
+const viewImagePopup = document.querySelector('.popup.popup_type_image');     // Поп-ап просмотра фото
+const viewImage = viewImagePopup.querySelector('.popup__image');              // Изображение в поп-апе
+const caption = viewImagePopup.querySelector('.popup__caption');              // Подпись к изображению
 const deleteConfirmPopup = document.querySelector('.popup.popup_type_delete-confirm'); // Окно подтверждения удаления
 
 // Формы
-const editProfileForm = document.forms['edit-profile'];                               // Форма редактирования профиля
-const addNewPlaceForm = document.forms['new-place'];                                  // Форма добавления карточки
-const changeAvatarForm = document.forms['change-avatar-form'];                        // Форма изменения аватара
+const editProfileForm = document.forms['edit-profile'];                       // Форма редактирования профиля
+const addNewPlaceForm = document.forms['new-place'];                          // Форма добавления карточки
+const changeAvatarForm = document.forms['change-avatar-form'];                // Форма изменения аватара
 
 // Профильные элементы
-const titleProfile = document.querySelector('.profile__title');                        // Заголовок профиля
-const descriptionProfile = document.querySelector('.profile__description');            // Описание профиля
-const profileImage = document.querySelector('.profile__image');                        // Аватар профиля
+const titleProfile = document.querySelector('.profile__title');                // Заголовок профиля
+const descriptionProfile = document.querySelector('.profile__description');    // Описание профиля
+const profileImage = document.querySelector('.profile__image');                // Аватар профиля
 
 // Кнопки
-const editProfileBtn = document.querySelector('.profile__edit-button');                // Кнопка редактирования профиля
-const addPlaceBtn = document.querySelector('.profile__add-button');                    // Кнопка добавления карточки
+const editProfileBtn = document.querySelector('.profile__edit-button');        // Кнопка редактирования профиля
+const addPlaceBtn = document.querySelector('.profile__add-button');            // Кнопка добавления карточки
 
 // Вспомогательные функции
 
