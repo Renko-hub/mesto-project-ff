@@ -1,34 +1,34 @@
 // index.js
 
 // Импортируем стили и модули
-import './index.css';                                  // Подключаем файл стилей
-import * as Api from '../components/api';              // Модуль API-запросов
-import * as Card from '../components/card';            // Работа с карточками
-import * as Modal from '../components/modal';          // Работа с модальными окнами
+import './index.css';                             // Подключаем файл стилей
+import * as Api from '../components/api';         // Модуль API-запросов
+import * as Card from '../components/card';       // Работа с карточками
+import * as Modal from '../components/modal';     // Работа с модальными окнами
 import * as Validation from '../components/validation'; // Валидаторы форм
 
 // Кэшируем нужные элементы страницы
-const placesList = document.querySelector('.places__list');                  // Контейнер карточек
-const editPopup = document.querySelector('.popup.popup_type_edit');          // Поп-ап редактирования профиля
+const placesList = document.querySelector('.places__list');                 // Контейнер карточек
+const editPopup = document.querySelector('.popup.popup_type_edit');         // Поп-ап редактирования профиля
 const addNewCardPopup = document.querySelector('.popup.popup_type_new-card'); // Поп-ап добавления карточки
-const viewImagePopup = document.querySelector('.popup.popup_type_image');    // Поп-ап просмотра фото
-const viewImage = viewImagePopup.querySelector('.popup__image');             // Изображение в поп-апе
-const caption = viewImagePopup.querySelector('.popup__caption');             // Подпись к изображению
+const viewImagePopup = document.querySelector('.popup.popup_type_image');   // Поп-ап просмотра фото
+const viewImage = viewImagePopup.querySelector('.popup__image');            // Изображение в поп-апе
+const caption = viewImagePopup.querySelector('.popup__caption');            // Подпись к изображению
 const deleteConfirmPopup = document.querySelector('.popup.popup_type_delete-confirm'); // Окно подтверждения удаления
 
 // Формы
-const editProfileForm = document.forms['edit-profile'];                     // Форма редактирования профиля
-const addNewPlaceForm = document.forms['new-place'];                        // Форма добавления карточки
-const changeAvatarForm = document.forms['change-avatar-form'];              // Форма изменения аватара
+const editProfileForm = document.forms['edit-profile'];                    // Форма редактирования профиля
+const addNewPlaceForm = document.forms['new-place'];                       // Форма добавления карточки
+const changeAvatarForm = document.forms['change-avatar-form'];             // Форма изменения аватара
 
 // Профильные элементы
-const titleProfile = document.querySelector('.profile__title');              // Заголовок профиля
-const descriptionProfile = document.querySelector('.profile__description');  // Описание профиля
-const profileImage = document.querySelector('.profile__image');              // Аватар профиля
+const titleProfile = document.querySelector('.profile__title');             // Заголовок профиля
+const descriptionProfile = document.querySelector('.profile__description'); // Описание профиля
+const profileImage = document.querySelector('.profile__image');             // Аватар профиля
 
 // Кнопки
-const editProfileBtn = document.querySelector('.profile__edit-button');      // Кнопка редактирования профиля
-const addPlaceBtn = document.querySelector('.profile__add-button');          // Кнопка добавления карточки
+const editProfileBtn = document.querySelector('.profile__edit-button');     // Кнопка редактирования профиля
+const addPlaceBtn = document.querySelector('.profile__add-button');         // Кнопка добавления карточки
 
 // Вспомогательные функции
 
@@ -67,7 +67,7 @@ function updateUserAvatar(avatarUrl) {
     .then(updatedUserInfo => {
       if (profileImage) {
         profileImage.style.backgroundImage = `url(${updatedUserInfo.avatar})`;
-        
+      
         // Сохраняем только аватар отдельно
         localStorage.setItem('avatar', updatedUserInfo.avatar);
       }
@@ -108,18 +108,27 @@ function handleEditProfile(evt) {
   const updatedTitle = formElements.name.value.trim();
   const updatedDescription = formElements.description.value.trim();
 
-  // Сразу меняем данные на странице
-  titleProfile.textContent = updatedTitle;
-  descriptionProfile.textContent = updatedDescription;
+  // Заблокировать кнопку и подготовить задержку
+  Modal.manageButtonState(submitButton, true);
 
-  // Сохраняем данные локально
-  localStorage.setItem('user-data', JSON.stringify({
-    name: updatedTitle,
-    about: updatedDescription
-  }));
+  setTimeout(() => {
+    // Только после задержки меняем текст
+    titleProfile.textContent = updatedTitle;
+    descriptionProfile.textContent = updatedDescription;
 
-  editProfileForm.reset();
-  Modal.closePopup(editPopup);
+    // Сохраняем данные локально
+    localStorage.setItem('user-data', JSON.stringify({
+      name: updatedTitle,
+      about: updatedDescription
+    }));
+
+    // Затем сбросить форму и закрыть модалку
+    editProfileForm.reset();
+    Modal.closePopup(editPopup);
+
+    // Через задержку разблокируем кнопку
+    Modal.manageButtonState(submitButton, false);
+  }, 800); // Задержка в 800 мс
 }
 
 // Создает новую карточку
@@ -168,12 +177,12 @@ function handleChangeAvatar(evt) {
 
 // Основная логика приложения
 Promise.all([
-  Api.getUserInfo(),                                // Добавлено получение информации о пользователе
+  Api.getUserInfo(),                              // Добавлено получение информации о пользователе
   Api.getInitialCards()
 ])
 .then(function ([userInfo, cards]) {
   // Получаем currentUserId и сохраняем его в глобальном пространстве
-  window.currentUserId = userInfo._id;             // Теперь получаем ID пользователя здесь
+  window.currentUserId = userInfo._id;           // Теперь получаем ID пользователя здесь
 
   // Проверяем, есть ли локальные данные пользователя
   let cachedUserData = localStorage.getItem('user-data');
@@ -201,7 +210,7 @@ Promise.all([
     profileImage.style.backgroundImage = `url("${avatarUrl}")`;
   } else {
     // Дефолтный аватар
-    profileImage.style.backgroundImage = `url("/src/images/default_avatar.jpg")`;
+    profileImage.style.backgroundImage = `url("/src/images/avatar.jpg")`;
   }
 
   // Рендерим начальные карточки
@@ -229,9 +238,9 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // Обработчик удаления карточки
-function handleRemoveCard(event) {
-  event.stopPropagation();
-  const target = event.target;
+function handleRemoveCard(evt) {
+  evt.stopPropagation();
+  const target = evt.target;
   const parentCard = target.closest('.card');
 
   if (parentCard && target.classList.contains('card__delete-button')) {
@@ -251,8 +260,5 @@ function handleDeleteConfirmation(cardId, cardElement) {
     .then(() => {
       cardElement.remove(); // Удаляем элемент из DOM
       Modal.closePopup(deleteConfirmPopup); // Закрываем модальное окно
-    })
-    .catch(error => {
-      console.error('Ошибка при удалении:', error);
     });
 }
