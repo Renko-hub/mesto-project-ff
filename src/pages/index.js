@@ -1,49 +1,49 @@
 // index.js
 
 // Импортируем стили и модули
-import './index.css';                                      // Подключаем файл стилей
-import * as Api from '../components/api';                  // Модуль API-запросов
-import * as Card from '../components/card';                // Работа с карточками
-import * as Modal from '../components/modal';              // Работа с модальными окнами
-import * as Validation from '../components/validation';    // Валидаторы форм
+import './index.css';                                   // Подключаем файл стилей
+import * as Api from '../components/api';               // Модуль API-запросов
+import * as Card from '../components/card';             // Работа с карточками
+import * as Modal from '../components/modal';           // Работа с модальными окнами
+import * as Validation from '../components/validation'; // Валидаторы форм
 
-// Кэширование нужных элементов страницы
-const placesList = document.querySelector('.places__list');                   // Контейнер карточек
-const editPopup = document.querySelector('.popup.popup_type_edit');           // Поп-ап редактирования профиля
+// Кэшируем нужные элементы страницы
+const placesList = document.querySelector('.places__list');                 // Контейнер карточек
+const editPopup = document.querySelector('.popup.popup_type_edit');         // Поп-ап редактирования профиля
 const addNewCardPopup = document.querySelector('.popup.popup_type_new-card'); // Поп-ап добавления карточки
-const viewImagePopup = document.querySelector('.popup.popup_type_image');     // Поп-ап просмотра фото
-const viewImage = viewImagePopup.querySelector('.popup__image');              // Изображение в поп-апе
-const caption = viewImagePopup.querySelector('.popup__caption');              // Подпись к изображению
+const viewImagePopup = document.querySelector('.popup.popup_type_image');   // Поп-ап просмотра фото
+const viewImage = viewImagePopup.querySelector('.popup__image');            // Изображение в поп-апе
+const caption = viewImagePopup.querySelector('.popup__caption');            // Подпись к изображению
 const deleteConfirmPopup = document.querySelector('.popup.popup_type_delete-confirm'); // Окно подтверждения удаления
 
 // Формы
-const editProfileForm = document.forms['edit-profile'];                       // Форма редактирования профиля
-const addNewPlaceForm = document.forms['new-place'];                          // Форма добавления карточки
-const changeAvatarForm = document.forms['change-avatar-form'];                // Форма изменения аватара
+const editProfileForm = document.forms['edit-profile'];                     // Форма редактирования профиля
+const addNewPlaceForm = document.forms['new-place'];                       // Форма добавления карточки
+const changeAvatarForm = document.forms['change-avatar-form'];             // Форма изменения аватара
 
 // Профильные элементы
-const titleProfile = document.querySelector('.profile__title');                // Заголовок профиля
-const descriptionProfile = document.querySelector('.profile__description');    // Описание профиля
-const profileImage = document.querySelector('.profile__image');                // Аватар профиля
+const titleProfile = document.querySelector('.profile__title');             // Заголовок профиля
+const descriptionProfile = document.querySelector('.profile__description'); // Описание профиля
+const profileImage = document.querySelector('.profile__image');             // Аватар профиля
 
 // Кнопки
-const editProfileBtn = document.querySelector('.profile__edit-button');        // Кнопка редактирования профиля
-const addPlaceBtn = document.querySelector('.profile__add-button');            // Кнопка добавления карточки
+const editProfileBtn = document.querySelector('.profile__edit-button');     // Кнопка редактирования профиля
+const addPlaceBtn = document.querySelector('.profile__add-button');         // Кнопка добавления карточки
 
 // Вспомогательные функции
 
-// Загрузка профайл-данных в форму редактирования
+// Загружаем данные профиля в форму редактирования
 function loadUserDataToForm(name, description) {
   editProfileForm.name.value = name;
   editProfileForm.description.value = description;
 }
 
-// Просмотр полноразмерного изображения с очисткой src перед установкой нового изображения
+// Показ полного изображения
 function showFullscreenImage(imageSrc, imageAlt) {
-  // Очищаем src перед заданием нового изображения
-  viewImage.src = ''; // Очистка src предотвращает краткосрочное отображение старого изображения
+  // Очищаем src перед загрузкой нового изображения
+  viewImage.src = '';
 
-  // Присваиваем новое изображение
+  // Устанавливаем новое изображение
   viewImage.src = imageSrc;
   viewImage.alt = imageAlt;
   caption.textContent = imageAlt;
@@ -52,78 +52,53 @@ function showFullscreenImage(imageSrc, imageAlt) {
   Modal.openModalWindow(viewImagePopup);
 }
 
-// Рендер стартовых карточек
-function renderInitialCards(userInfo, cards, onClick, currentUserId) {
-  if (userInfo) {
-    titleProfile.textContent = userInfo.name;
-    descriptionProfile.textContent = userInfo.about;
-  }
-
-  // Проходим по всем карточкам и создаем их элементы
+// Рендер начальных карточек
+function renderInitialCards(cards, onClick, currentUserId) {
+  // Проходим по всем карточкам и создаём их элементы
   cards.forEach((data) => {
     const cardElement = Card.createCard(data, onClick, currentUserId);
     placesList.append(cardElement); // Добавляем карточку в список
   });
 }
 
-// Обновление аватара пользователя
+// Обновляем аватар пользователя
 function updateUserAvatar(avatarUrl) {
   return Api.updateUserAvatar(avatarUrl)
     .then(updatedUserInfo => {
       if (profileImage) {
         profileImage.style.backgroundImage = `url(${updatedUserInfo.avatar})`;
-        // Сохраняем новый аватар в localStorage
+        
+        // Сохраняем только аватар отдельно
         localStorage.setItem('avatar', updatedUserInfo.avatar);
       }
     });
 }
 
-// Функция сохранения данных в localStorage
-function saveUserData() {
-  const name = titleProfile.textContent.trim();
-  const about = descriptionProfile.textContent.trim();
-
-  // Извлекаем URL аватара из стиля
-  const bgStyle = profileImage.style.backgroundImage;
-  const matchResult = bgStyle.match(/url$['"]*(.*?)['"]*$/);
-  const avatar = matchResult ? matchResult[1].replace(/["']/g, '') : '';
-
-  localStorage.setItem('user-data', JSON.stringify({
-    name,
-    about,
-    avatar
-  }));
-}
-
-// Общие обработчики для кнопок
-function handleButtonWithDelay(button, action) {
-  // Сначала блокируем кнопку и меняем текст
+// Управление кнопкой с задержкой
+function manageButtonWithDelay(button, action) {
   Modal.manageButtonState(button, true);
 
-  // Выполняем действие с небольшой задержкой
   setTimeout(() => {
     action().then(() => {
-      // Возвращаем кнопку в исходное состояние
       Modal.manageButtonState(button, false);
     }).catch(() => {
-      // В случае ошибки возвращаем кнопку в исходное состояние
       Modal.manageButtonState(button, false);
     });
   }, 800); // Задержка в 0.8 секунды
 }
 
-// Открытие окна редактирования профиля
+// Открывает окно редактирования профиля
 function openEditProfile() {
   loadUserDataToForm(titleProfile.textContent, descriptionProfile.textContent);
   Modal.openModalWindow(editPopup);
 }
 
-// Открытие окна добавления карточки
+// Открывает окно добавления карточки
 function openAddCard() {
   Modal.openModalWindow(addNewCardPopup);
 }
 
-// Обновление профиля пользователя
+// Обновляет профиль пользователя локально
 function handleEditProfile(evt) {
   evt.preventDefault();
 
@@ -133,23 +108,21 @@ function handleEditProfile(evt) {
   const updatedTitle = formElements.name.value.trim();
   const updatedDescription = formElements.description.value.trim();
 
-  // Действие с задержкой
-  handleButtonWithDelay(submitButton, () =>
-    Api.updateUserInfo({ name: updatedTitle, about: updatedDescription })
-      .then(updatedUserInfo => {
-        titleProfile.textContent = updatedUserInfo.name;
-        descriptionProfile.textContent = updatedUserInfo.about;
+  // Сразу меняем данные на странице
+  titleProfile.textContent = updatedTitle;
+  descriptionProfile.textContent = updatedDescription;
 
-        // Сохраняем данные в localStorage
-        saveUserData();
+  // Сохраняем данные локально
+  localStorage.setItem('user-data', JSON.stringify({
+    name: updatedTitle,
+    about: updatedDescription
+  }));
 
-        editProfileForm.reset();
-        Modal.closePopup(editPopup);
-      })
-  );
+  editProfileForm.reset();
+  Modal.closePopup(editPopup);
 }
 
-// Создание новой карточки
+// Создает новую карточку
 function handleAddNewPlace(evt) {
   evt.preventDefault();
 
@@ -161,8 +134,7 @@ function handleAddNewPlace(evt) {
 
   if (!placeName || !linkURL) return;
 
-  // Действие с задержкой
-  handleButtonWithDelay(submitButton, () =>
+  manageButtonWithDelay(submitButton, () =>
     Api.createCard({ name: placeName, link: linkURL })
       .then(newCard => {
         const newCardElement = Card.createCard(newCard, showFullscreenImage, window.currentUserId);
@@ -174,7 +146,7 @@ function handleAddNewPlace(evt) {
   );
 }
 
-// Обновление аватара пользователя
+// Обновляет аватар пользователя
 function handleChangeAvatar(evt) {
   evt.preventDefault();
 
@@ -185,62 +157,59 @@ function handleChangeAvatar(evt) {
 
   if (!avatarUrl) return;
 
-  // Действие с задержкой
-  handleButtonWithDelay(submitButton, () =>
+  manageButtonWithDelay(submitButton, () =>
     updateUserAvatar(avatarUrl)
       .then(() => {
         Modal.closePopup(document.querySelector('.popup.popup_type_change-avatar'));
         form.reset();
-
-        // Сохраняем данные в localStorage
-        saveUserData();
       })
   );
 }
 
-// Основная логика приложения
+// Главная логика приложения
 Promise.all([
-  Api.getUserInfo(),
   Api.getInitialCards()
-])
-  .then(function ([userInfo, cards]) {
-    // Получаем currentUserId и сохраняем его в глобальном пространстве
-    window.currentUserId = userInfo._id;
+]).then(function ([cards]) {
+  // Получаем currentUserId и сохраняем его в глобальном пространстве
+  window.currentUserId = null; // Предположительно id удалён из контекста
 
-    // Читаем кэшированные данные из localStorage
-    const cachedUserData = localStorage.getItem('user-data');
+  // Проверяем, есть ли локальные данные пользователя
+  let cachedUserData = localStorage.getItem('user-data');
+  if (cachedUserData) {
+    let { name, about } = JSON.parse(cachedUserData);
 
-    // Проверяем наличие данных в localStorage
-    if (cachedUserData) {
-      const parsedUserData = JSON.parse(cachedUserData);
-      titleProfile.textContent = parsedUserData.name;
-      descriptionProfile.textContent = parsedUserData.about;
+    // Отображаем данные из localStorage
+    titleProfile.textContent = name;
+    descriptionProfile.textContent = about;
+  } else {
+    // Новому пользователю показываем дефолтные данные
+    titleProfile.textContent = 'Жак-Ив Кусто';
+    descriptionProfile.textContent = 'Исследователь океана';
 
-      // Проверяем существование аватара и ставим фон
-      if (parsedUserData.avatar) {
-        profileImage.style.backgroundImage = `url("${parsedUserData.avatar}")`;
-      }
-    } else {
-      // Применяем данные по умолчанию ("Жак-Ив Кусто")
-      titleProfile.textContent = 'Жак-Ив Кусто';
-      descriptionProfile.textContent = 'Исследователь океана';
-      profileImage.style.backgroundImage = `url("/src/images/default_avatar.jpg")`;
+    // Сохраняем дефолтные данные в localStorage
+    localStorage.setItem('user-data', JSON.stringify({
+      name: 'Жак-Ив Кусто',
+      about: 'Исследователь океана'
+    }));
+  }
 
-      // Сохраняем данные по умолчанию в localStorage
-      saveUserData();
-    }
+  // Применяем аватар из localStorage
+  const avatarUrl = localStorage.getItem('avatar');
+  if (avatarUrl) {
+    profileImage.style.backgroundImage = `url("${avatarUrl}")`;
+  } else {
+    // Дефолтный аватар
+    profileImage.style.backgroundImage = `url("/src/images/default_avatar.jpg")`;
+  }
 
-    // Рендерим стартовые карточки
-    renderInitialCards(userInfo, cards, showFullscreenImage, window.currentUserId);
-  })
-  .catch(function () { });
+  // Рендерим начальные карточки
+  renderInitialCards(cards, showFullscreenImage, window.currentUserId);
+}).catch(function () {});
 
-// Обработка закрытия страницы
-window.onbeforeunload = function () {
-  // Ничего не делаем специально при выгрузке страницы
-};
+// Обрабатываем закрытие страницы
+window.onbeforeunload = function () {};
 
-// Регистрация слушателей событий
+// Регистрируем слушатели событий
 document.addEventListener('DOMContentLoaded', function () {
   editProfileBtn.addEventListener('pointerdown', openEditProfile);
   addPlaceBtn.addEventListener('pointerdown', openAddCard);
@@ -278,34 +247,8 @@ function handleRemoveCard(evt) {
 
 // Обработчик удаления карточки
 function handleDeleteConfirmation(cardId, cardElement) {
-  Api.deleteCard(cardId)
-    .then(function () {
-      cardElement.remove(); // Удаляем элемент из DOM
-      Modal.closePopup(deleteConfirmPopup); // Закрываем модал
-    })
-    .catch(function () { });
-}
-
-// Приложим имя и описание из localStorage при загрузке страницы
-const savedUserData = localStorage.getItem('user-data');
-if (savedUserData) {
-  const data = JSON.parse(savedUserData);
-  titleProfile.textContent = data.name || '';
-  descriptionProfile.textContent = data.about || '';
-  profileImage.style.backgroundImage = `url("${data.avatar}")`;
-}
-
-// Определение, является ли это первый визит
-const firstVisitKey = 'firstVisit';
-let isFirstVisit = localStorage.getItem(firstVisitKey) !== 'false';
-
-if (isFirstVisit) {
-  const defaultValues = { name: 'Жак-Ив Кусто', about: 'Исследователь океана', avatar: '/src/images/default_avatar.jpg' };
-  Object.assign(localStorage, defaultValues);
-  localStorage.setItem(firstVisitKey, 'false'); // Устанавливаем значение "не первый визит"
-}
-
-// Применение аватара при старте
-if (localStorage.getItem('avatar')) {
-  profileImage.style.backgroundImage = `url(${localStorage.getItem('avatar')})`;
+  Api.deleteCard(cardId).then(function () {
+    cardElement.remove(); // Удаляем элемент из DOM
+    Modal.closePopup(deleteConfirmPopup); // Закрываем модал
+  }).catch(function () {});
 }
