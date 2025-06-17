@@ -1,84 +1,25 @@
 // validation.js
 
-// Конфигурация по умолчанию для валидатора
-const defaultConfig = {
-  formSelector: '.popup__form',
-  inputSelector: '.popup__input',
-  submitButtonSelector: '.popup__button',
-  inactiveButtonClass: 'popup__button_disabled',
-  inputErrorClass: 'popup__input_type_error',
-  errorClass: 'popup__error_visible'
-};
+// Регулярное выражение для проверки разрешённых символов
+const validCharsRegex = /^[A-Za-zА-Яа-яЁё\s-]*$/;
 
-// Проверка обязательного заполнения поля
-function checkRequired(value) {
-  return value.trim().length > 0;
-}
-
-// Проверка допустимых символов
-function checkValidCharacters(value) {
-   return /^[A-Za-zА-Яа-яЁё]+([- ][A-Za-zА-Яа-яЁё]+)*$/.test(value);
-}
-
-// Проверка формата URL
-function checkValidUrl(value) {
-  return /(^(?:http|https):\/\/[^\s]+)/i.test(value);
-}
-
-// Проверка поля "Имя"
-function validateName(value) {
-  if (!checkRequired(value)) return 'Вы пропустили это поле.';
-  if (!checkValidCharacters(value)) return 'Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы.';
-  if (value.length < 2 || value.length > 40) return 'В этом поле должно быть от 2 до 40 символов.';
-  return '';
-}
-
-// Проверка поля "Название места"
-function validatePlaceName(value) {
-  if (!checkRequired(value)) return 'Вы пропустили это поле.';
-  if (!checkValidCharacters(value)) return 'Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы.';
-  if (value.length < 2 || value.length > 30) return 'В этом поле должно быть от 2 до 30 символов.';
-  return '';
-}
-
-// Проверка поля "Описание"
-function validateDescription(value) {
-  if (!checkRequired(value)) return 'Вы пропустили это поле.';
-  if (!checkValidCharacters(value)) return 'Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы.';
-  if (value.length < 2 || value.length > 200) return 'В этом поле должно быть от 2 до 200 символов.';
-  return '';
-}
-
-// Проверка поля "Ссылка"
-function validateLink(value) {
-  if (!checkRequired(value)) return 'Введите адрес сайта.'; // Исправленное условие
-  if (!checkValidUrl(value)) return 'Введите адрес в формате http:// или https://';
-  return '';
-}
-
-// Универсальная функция валидации любого поля
+// Валидаторы и обработка ошибок
 function validateField(field, config) {
+  // Проверяет содержание поля на соответствие требованиям валидации
   const value = field.value.trim();
-
-  // Выбор подходящей функции валидации в зависимости от имени поля
-  switch (field.name) {
-    case 'name': return validateName(value);
-    case 'place-name': return validatePlaceName(value);
-    case 'description': return validateDescription(value);
-    case 'link': return validateLink(value);
-    default: return '';
+  if (field.type === 'text' && value.length > 0 && !validCharsRegex.test(value)) {
+    return 'Допустимы только латиница, кириллица, дефис и пробел';
   }
+  return '';
 }
 
-// Обновляет статус одного поля и показывает/снимает ошибки
 function updateInputStatus(input, config) {
+  // Показывает или скрывает ошибки в полях формы
   const errorMessage = validateField(input, config);
-
   if (errorMessage) {
     input.classList.add(config.inputErrorClass);
     input.setAttribute('data-error-message', errorMessage);
-
-    // Находим или создаем блок ошибки
+    // Создание и вставка блока с текстом ошибки
     let errorElement = input.nextElementSibling;
     if (!errorElement || !errorElement.classList.contains('popup__error')) {
       errorElement = document.createElement('div');
@@ -90,8 +31,7 @@ function updateInputStatus(input, config) {
   } else {
     input.classList.remove(config.inputErrorClass);
     input.removeAttribute('data-error-message');
-
-    // Удаляем блок ошибки, если он есть
+    // Удаление существующего блока с ошибкой
     const errorElement = input.nextElementSibling;
     if (errorElement && errorElement.classList.contains('popup__error')) {
       errorElement.remove();
@@ -99,51 +39,62 @@ function updateInputStatus(input, config) {
   }
 }
 
-// Проверяет всю форму и блокирует/разблокирует кнопку отправки
+// Управление кнопкой отправки
 function checkButtonState(form, config) {
-  const inputs = form.querySelectorAll(config.inputSelector);
+  // Включает или выключает кнопку отправки в зависимости от правильности заполнения формы
   const submitButton = form.querySelector(config.submitButtonSelector);
+  const inputs = form.querySelectorAll(config.inputSelector);
 
-  let hasErrors = false;
-
+  let isValid = true;
   inputs.forEach(input => {
-    const errorMessage = validateField(input, config);
-    if (errorMessage) hasErrors = true;
+    const errMsg = validateField(input, config);
+    if (errMsg || input.value === '') {
+      isValid = false;
+    }
   });
 
-  if (hasErrors) {
-    submitButton.classList.add(config.inactiveButtonClass);
-    submitButton.disabled = true;
-  } else {
-    submitButton.classList.remove(config.inactiveButtonClass);
-    submitButton.disabled = false;
-  }
+  submitButton.disabled = !isValid;
+  submitButton.classList.toggle(config.inactiveButtonClass, !isValid);
 }
 
-// Включает глобальную проверку всех форм
-function enableValidation(config = {}) {
-  const mergedConfig = Object.assign({}, defaultConfig, config);
+// Очистка ошибок
+function clearValidation(form, config) {
+  // Полностью удаляет ошибки и возвращает форму в исходное состояние
+  const inputs = form.querySelectorAll(config.inputSelector);
 
-  const forms = document.querySelectorAll(mergedConfig.formSelector);
+  inputs.forEach((input) => {
+    input.classList.remove(config.inputErrorClass);
+    input.removeAttribute('data-error-message');
 
-  forms.forEach(form => {
-    const inputs = form.querySelectorAll(mergedConfig.inputSelector);
-    const submitButton = form.querySelector(config.submitButtonSelector);
+    const errorElement = input.nextElementSibling;
+    if (errorElement && errorElement.classList.contains('popup__error')) {
+      errorElement.remove();
+    }
+  });
 
-    inputs.forEach(input => {
+  const submitButton = form.querySelector(config.submitButtonSelector);
+  submitButton.disabled = true;
+  submitButton.classList.add(config.inactiveButtonClass);
+}
+
+// Инициализация валидации
+function enableValidation(config) {
+  // Подключает обработку событий для включения валидации на всех формах
+  const forms = document.querySelectorAll(config.formSelector);
+
+  forms.forEach((form) => {
+    const inputs = form.querySelectorAll(config.inputSelector);
+
+    inputs.forEach((input) => {
       input.addEventListener('input', () => {
-        updateInputStatus(input, mergedConfig);
-        checkButtonState(form, mergedConfig);
-      });
-
-      input.addEventListener('blur', () => {
-        checkButtonState(form, mergedConfig);
+        updateInputStatus(input, config);
+        checkButtonState(form, config);
       });
     });
 
-    checkButtonState(form, mergedConfig);
+    checkButtonState(form, config);
   });
 }
 
-// Экспорт функций модуля
-export { validateField, enableValidation, updateInputStatus, checkButtonState, defaultConfig };
+// Экспорт функций (при необходимости экспорта):
+export { validateField, updateInputStatus, checkButtonState, clearValidation, enableValidation };

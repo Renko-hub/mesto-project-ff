@@ -25,40 +25,41 @@
         <button class="profile__add-button" type="button"></button>
       </section>
       <section class="places page__section">
-        <ul class="places__list">
-        </ul>
+        <ul class="places__list"></ul>
       </section>
     </main>
     <footer class="footer page__section">
-      <p class="footer__copyright">
-        © 2025 Mesto Russia
-      </p>
+      <p class="footer__copyright">© 2025 Mesto Russia</p>
     </footer>
+    <!-- Окно редактирования профиля -->
     <div class="popup popup_type_edit">
       <div class="popup__content">
         <button type="button" class="popup__close"></button>
         <h3 class="popup__title">Редактировать профиль</h3>
         <form class="popup__form" name="edit-profile">
-          <input type="text" name="name" class="popup__input popup__input_type_name" placeholder="Имя" required>
+          <input type="text" name="name" class="popup__input popup__input_type_name" placeholder="Имя" required
+            minlength="2" maxlength="40">
           <input type="text" name="description" class="popup__input popup__input_type_description" placeholder="Занятие"
-            required>
+            required minlength="2" maxlength="200">
           <button type="submit" class="button popup__button">Сохранить</button>
         </form>
       </div>
     </div>
+    <!-- Окно добавления нового места -->
     <div class="popup popup_type_new-card">
       <div class="popup__content">
         <button type="button" class="popup__close"></button>
         <h3 class="popup__title">Новое место</h3>
         <form class="popup__form" name="new-place">
           <input type="text" name="place-name" class="popup__input popup__input_type_card-name" placeholder="Название"
-            required>
+            required minlength="2" maxlength="30">
           <input type="url" name="link" class="popup__input popup__input_type_url" placeholder="Ссылка на картинку"
             required>
           <button type="submit" class="button popup__button">Сохранить</button>
         </form>
       </div>
     </div>
+    <!-- Окно просмотра фотографии -->
     <div class="popup popup_type_image">
       <div class="popup__content popup__content_content_image">
         <button type="button" class="popup__close"></button>
@@ -66,19 +67,20 @@
         <p class="popup__caption"></p>
       </div>
     </div>
-    <!-- Модальное окно для изменения аватара -->
+    <!-- Окно изменения аватара -->
     <div class="popup popup_type_change-avatar">
       <div class="popup__content">
         <button type="button" class="popup__close"></button>
         <h3 class="popup__title">Обновить аватар</h3>
         <form class="popup__form" name="change-avatar-form">
+          <!-- Тип поля "url" обеспечивает проверку правильности URL -->
           <input type="url" name="link" class="popup__input popup__input_type_url" placeholder="Ссылка на картинку"
             required>
           <button type="submit" class="button popup__button">Сохранить</button>
         </form>
       </div>
     </div>
-    <!-- Новое модальное окно для подтверждения удаления -->
+    <!-- Окно подтверждения удаления -->
     <div class="popup popup_type_delete-confirm">
       <div class="popup__content">
         <button type="button" class="popup__close"></button>
@@ -86,9 +88,10 @@
         <button type="button" class="button popup__button popup__button_confirm">Да</button>
       </div>
     </div>
+    <!-- Шаблон карточки -->
     <template id="card-template">
       <li class="places__item card">
-        <img class="card__image" src="" alt="" />
+        <img class="card__image" src="" alt="">
         <button type="button" class="card__delete-button"></button>
         <div class="card__description">
           <h2 class="card__title"></h2>
@@ -99,6 +102,7 @@
         </div>
       </li>
     </template>
+  </div>
 </body>
 
 </html>
