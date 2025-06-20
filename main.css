@@ -36,7 +36,7 @@
 .popup__form{margin-top:27px}
 .popup__input{border:0;border-bottom:1px solid rgba(0,0,0,.2);box-sizing:border-box;font-size:14px;height:47px;line-height:18px;padding:10px 0 0;width:100%}@media screen and (max-width:568px){.popup__title{font-size:12px;line-height:15px}}
 .popup__input_type_error{border-color:red}
-.popup__error{color:red;display:inline-block;font-size:12px;line-height:normal;margin-bottom:10px;opacity:0;transition:.3s}
+.popup__input_type_error{color:red;display:inline-block;font-size:12px;line-height:normal;margin-bottom:10px;opacity:0;transition:.3s}
 .popup__error_visible{opacity:1}
 .popup__button{align-items:center;background:#000;border:none;border-radius:2px;color:#fff;display:flex;font-size:18px;height:50px;justify-content:center;line-height:22px;margin-top:48px;transition:visibility 0s,background .3s;width:100%}.popup__button:hover{background:rgba(0,0,0,.8);cursor:pointer}@media screen and (max-width:568px){.popup__button{font-size:14px;line-height:17px}}
 .popup__button_disabled{background:transparent;border:1px solid #000;color:#000;cursor:default;opacity:.2;pointer-events:none}
