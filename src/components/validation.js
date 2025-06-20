@@ -1,116 +1,112 @@
-// validation.js
+// Основная функция для создания валидатора
+function validateForm(config, formElement) {
+  const inputList = Array.from(formElement.querySelectorAll(config.inputSelector));
+  const buttonElement = formElement.querySelector(config.submitButtonSelector);
 
-// Регулярное выражение теперь локализовано внутри функции
-function validateField(field) {
-  const value = field.value.trim();
-  const validCharsRegex = /^[A-Za-zА-Яа-яЁё\s-]*$/;
+  // Метод для отображения ошибки
+  function showInputError(inputElement) {
+    const errorSpan = inputElement.nextElementSibling;
 
-  if (field.type === 'text' && value.length > 0 && !validCharsRegex.test(value)) {
-    return 'Неверный формат. Допускаются только буквы, дефис и пробел.';
+    // Кастомное сообщение, если шаблон неправильный
+    let customErrorMessage = '';
+    if (inputElement.validity.patternMismatch && inputElement.hasAttribute('data-error-message')) {
+      customErrorMessage = inputElement.getAttribute('data-error-message');
+    }
+
+    // Итоговое сообщение
+    const finalErrorMessage = customErrorMessage || inputElement.validationMessage;
+
+    // Печать ошибки
+    errorSpan.textContent = finalErrorMessage;
+    errorSpan.classList.add(config.inputErrorClass); // Класс ошибки
+    errorSpan.classList.add(config.errorClass); // Видимость ошибки
   }
 
-  return '';
-}
+  // Метод для скрытия ошибки
+  function hideInputError(inputElement) {
+    const errorSpan = inputElement.nextElementSibling;
+    errorSpan.textContent = '';
+    errorSpan.classList.remove(config.errorClass); // Скрываем ошибку
+  }
 
-// Обновляет статус поля и отображает ошибки
-function updateInputStatus(input, config) {
-  const errorMessage = validateField(input);
+  // Проверка наличия неверных полей
+  function hasInvalidInput() {
+    return inputList.some(inputElement => !inputElement.validity.valid);
+  }
 
-  if (errorMessage) {
-    input.classList.add(config.inputErrorClass);
-    input.setAttribute('data-error-message', errorMessage);
-
-    // Если элемент ошибки уже существует, используем его,
-    // иначе создаем новый
-    let errorElement = input.nextElementSibling;
-    if (!errorElement || !errorElement.classList.contains('popup__error')) {
-      errorElement = document.createElement('div');
-      errorElement.classList.add('popup__error');
-      input.parentNode.insertBefore(errorElement, input.nextSibling);
-    }
-    errorElement.textContent = errorMessage;
-    errorElement.classList.add(config.errorClass);
-  } else {
-    input.classList.remove(config.inputErrorClass);
-    input.removeAttribute('data-error-message');
-
-    // Удаляем элемент ошибки, если он есть
-    const errorElement = input.nextElementSibling;
-    if (errorElement && errorElement.classList.contains('popup__error')) {
-      errorElement.remove();
+  // Переключение состояния кнопки
+  function toggleButtonState() {
+    if (hasInvalidInput()) {
+      buttonElement.classList.add(config.inactiveButtonClass); // Блокируем кнопку
+      buttonElement.disabled = true;
+    } else {
+      buttonElement.classList.remove(config.inactiveButtonClass); // Разблокируем кнопку
+      buttonElement.disabled = false;
     }
   }
+
+  // Добавляем обработчик на каждое изменение ввода
+  function setupInputListeners() {
+    inputList.forEach((inputElement) => {
+      inputElement.addEventListener('input', () => {
+        // Проверяем корректность
+        if (!inputElement.validity.valid) {
+          showInputError(inputElement);
+        } else {
+          hideInputError(inputElement);
+        }
+
+        // Обновляем состояние кнопки
+        toggleButtonState();
+      });
+    });
+  }
+
+  // Сброс валидации при повторной отправке формы
+  function resetValidation() {
+    inputList.forEach((inputElement) => {
+      hideInputError(inputElement);
+    });
+    toggleButtonState(); // Обновляем состояние кнопки
+  }
+
+  // Инициализация валидации
+  function enableValidation() {
+    setupInputListeners();
+    toggleButtonState();
+  }
+
+  return {
+    enableValidation,
+    resetValidation,
+    toggleButtonState
+  };
 }
 
-// Включает/отключает кнопку формы в зависимости от валидности полей
+// Вспомогательные функции
 function checkButtonState(form, config) {
-  const submitButton = form.querySelector(config.submitButtonSelector);
-  const inputs = form.querySelectorAll(config.inputSelector);
-
-  let isValid = true;
-  inputs.forEach(input => {
-    const errMsg = validateField(input);
-    if (errMsg || input.value.trim() === '') {
-      isValid = false;
-    }
-  });
-
-  submitButton.disabled = !isValid;
-  submitButton.classList.toggle(config.inactiveButtonClass, !isValid);
+  const validatorInstance = validateForm(config, form);
+  validatorInstance.toggleButtonState();
 }
 
-// Очищает поле ввода и удаляет ошибку
 function clearValidation(form, config) {
-  const inputs = form.querySelectorAll(config.inputSelector);
-
-  inputs.forEach((input) => {
-    input.classList.remove(config.inputErrorClass);
-    input.removeAttribute('data-error-message');
-
-    // Удаляем блок ошибки, если он есть
-    const errorElement = input.nextElementSibling;
-    if (errorElement && errorElement.classList.contains('popup__error')) {
-      errorElement.remove();
-    }
-  });
-
-  const submitButton = form.querySelector(config.submitButtonSelector);
-  submitButton.disabled = true;
-  submitButton.classList.add(config.inactiveButtonClass);
+  const validatorInstance = validateForm(config, form);
+  validatorInstance.resetValidation();
 }
 
-// Подключение валидации форм
 function enableValidation(config) {
   const forms = document.querySelectorAll(config.formSelector);
 
   forms.forEach((form) => {
-    const inputs = form.querySelectorAll(config.inputSelector);
-
-    inputs.forEach((input) => {
-      input.addEventListener('input', (evt) => {
-        updateInputStatus(input, config);
-        checkButtonState(form, config);
-      });
-
-      // Обрабатываем ситуацию, когда браузер сам показывает встроенную ошибку
-      input.addEventListener('invalid', (evt) => {
-        evt.preventDefault(); // Предотвращаем стандартное поведение браузера
-
-        // Проверяем наличие элемента ошибки и устанавливаем его
-        let errorElement = input.nextElementSibling;
-        if (!errorElement || !errorElement.classList.contains('popup__error')) {
-          errorElement = document.createElement('div');
-          errorElement.classList.add('popup__error');
-          input.parentNode.insertBefore(errorElement, input.nextSibling);
-        }
-        errorElement.textContent = input.validationMessage;
-        errorElement.classList.add(config.errorClass);
-      });
-    });
-
-    checkButtonState(form, config); // Начальная проверка состояния кнопки
+    const validatorInstance = validateForm(config, form);
+    validatorInstance.enableValidation();
   });
 }
 
-// Экспорт функций (при необходимости)
-export { validateField, updateInputStatus, checkButtonState, clearValidation, enableValidation };
+// Групповой экспорт всех методов и интерфейса валидации
+export {
+  validateForm,
+  checkButtonState,
+  clearValidation,
+  enableValidation
+};

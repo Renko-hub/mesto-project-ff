@@ -16,7 +16,7 @@
     </header>
     <main class="content">
       <section class="profile page__section">
-        <button type="button" class="profile__image"></button>
+        <button type="button" class="profile__image" style="background-image: url(...)"></button>
         <div class="profile__info">
           <h1 class="profile__title"></h1>
           <button class="profile__edit-button" type="button"></button>
@@ -37,10 +37,16 @@
         <button type="button" class="popup__close"></button>
         <h3 class="popup__title">Редактировать профиль</h3>
         <form class="popup__form" name="edit-profile">
-          <input type="text" name="name" class="popup__input popup__input_type_name" placeholder="Имя" required
-            minlength="2" maxlength="40">
+          <input type="text" name="name" class="popup__input popup__input_type_name" placeholder="Имя" minlength="2"
+            maxlength="40" pattern="^([A-Za-zА-Яа-яЁё\s-]+)$"
+            data-error-message="Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы" required />
+          <span class="popup__input_type_error"></span> <!-- Контейнер для вывода ошибки -->
+
           <input type="text" name="description" class="popup__input popup__input_type_description" placeholder="Занятие"
-            required minlength="2" maxlength="200">
+            minlength="2" maxlength="200" pattern="^([A-Za-zА-Яа-яЁё\s-]+)$"
+            data-error-message="Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы" required />
+          <span class="popup__input_type_error"></span> <!-- Контейнер для вывода ошибки -->
+
           <button type="submit" class="button popup__button">Сохранить</button>
         </form>
       </div>
@@ -52,9 +58,14 @@
         <h3 class="popup__title">Новое место</h3>
         <form class="popup__form" name="new-place">
           <input type="text" name="place-name" class="popup__input popup__input_type_card-name" placeholder="Название"
-            required minlength="2" maxlength="30">
+            minlength="2" maxlength="30" pattern="^([A-Za-zА-Яа-яЁё\s-]+)$"
+            data-error-message="Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы" required />
+          <span class="popup__input_type_error"></span> <!-- Контейнер для вывода ошибки -->
+
           <input type="url" name="link" class="popup__input popup__input_type_url" placeholder="Ссылка на картинку"
             required>
+          <span class="popup__input_type_error"></span> <!-- Контейнер для вывода ошибки -->
+
           <button type="submit" class="button popup__button">Сохранить</button>
         </form>
       </div>
@@ -75,6 +86,8 @@
         <form class="popup__form" name="change-avatar-form">
           <input type="url" name="link" class="popup__input popup__input_type_url" placeholder="Ссылка на картинку"
             required>
+          <span class="popup__input_type_error"></span> <!-- Контейнер для вывода ошибки -->
+
           <button type="submit" class="button popup__button">Сохранить</button>
         </form>
       </div>

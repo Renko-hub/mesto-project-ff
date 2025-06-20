@@ -94,7 +94,8 @@ function toggleLike(cardId, buttonElement, counterElement, currentUserId) {
       .then(() => {
         saveLikeState(cardId, !wasLikedBefore); // сохраняет новое состояние
         resolve(!wasLikedBefore);
-      });
+      })
+      .catch(error => console.error(`Ошибка переключения лайка: ${error}`)); // проверка на ошибку
   })
     .then((isNowLiked) => {
       updateUIOnLike(buttonElement, counterElement, isNowLiked);

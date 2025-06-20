@@ -1,50 +1,40 @@
 // modal.js
 
-// Функция открытия модального окна
-const openModal = (modalElement) => {
-  return new Promise((resolve) => {
-    modalElement.classList.add('popup_is-opened');
-    
-    // Добавляем обработчики событий клавиатуры и мыши
-    document.addEventListener('keydown', handleDocumentKeydown);
-    document.addEventListener('pointerdown', handleModalPointerdown);
-  
-    resolve();
-  });
-};
-
-// Функция закрытия модального окна
-const closeModal = (modalElement) => {
-  return new Promise((resolve) => {
-    modalElement.classList.remove('popup_is-opened');
-    
-    // Удаляем обработчики событий клавиатуры и мыши
-    document.removeEventListener('keydown', handleDocumentKeydown);
-    document.removeEventListener('pointerdown', handleModalPointerdown);
-  
-    resolve();
-  });
-};
-
-// Обработчик события нажатия клавиши Escape
-const handleDocumentKeydown = (evt) => {
-  if (evt.key === 'Escape') {
-    closeModal(document.querySelector('.popup_is-opened'));
+// Универсальная функция открытия окна
+function openModal(popupElement, additionalClass = '') {
+  if (!popupElement) {
+    return;
   }
-};
 
-// Обработчик кликов мыши для закрытия модального окна
-const handleModalPointerdown = (evt) => {
-  const activeModal = evt.target.closest('.popup_is-opened');
-
-  if (
-    activeModal &&
-    (activeModal === evt.target || 
-     evt.target.closest('.popup__close'))
-  ) {
-    closeModal(activeModal);
+  popupElement.classList.add('popup_is-opened');
+  if (additionalClass) {
+    popupElement.classList.add(additionalClass);
   }
-};
 
-// Экспорт функций управления модальным окном
-export { openModal, closeModal };
+  document.addEventListener('keydown', closeModalESC);
+}
+
+// Универсальная функция закрытия окна
+function closeModal(popupElement) {
+  if (popupElement && popupElement.classList.contains('popup_is-opened')) {
+    popupElement.classList.remove('popup_is-opened');
+    document.removeEventListener('keydown', closeModalESC);
+  }
+}
+
+// Обработчик закрытия окна клавишей Escape
+function closeModalESC(event) {
+  if (event.key === 'Escape') {
+    const openedPopup = document.querySelector('.popup.popup_is-opened');
+    if (openedPopup) {
+      closeModal(openedPopup);
+    }
+  }
+}
+
+// Экспорт функций
+export {
+  openModal,
+  closeModal,
+  closeModalESC,
+};

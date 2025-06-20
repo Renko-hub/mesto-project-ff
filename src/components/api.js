@@ -50,10 +50,10 @@ const updateUserInfo = ({ name, about }) => request(`${CONFIG.baseUrl}/users/me`
 });
 
 // Обновляет аватар пользователя
-const updateUserAvatar = (avatarLink) => request(`${CONFIG.baseUrl}/users/me/avatar`, {
+const updateUserAvatar = (link) => request(`${CONFIG.baseUrl}/users/me/avatar`, {
   headers: CONFIG.headers,
   method: 'PATCH',
-  body: JSON.stringify({ avatar: avatarLink }),
+  body: JSON.stringify({ avatar: link }),
 });
 
 // Удаляет карточку с сервера
