@@ -21,7 +21,7 @@ const hideInputError = ({ inputElement, inputErrorClass, errorClass }) => {
 };
 
 // Валидирует отдельное поле и показывает соответствующую ошибку
-const checkInputValidity = ({ formElement, inputElement, inputErrorClass, errorClass }) => {
+const checkInputValidity = ({ inputElement, inputErrorClass, errorClass }) => {
   const isPatternMismatch = inputElement.dataset.errorMessage && inputElement.validity.patternMismatch;
   const customMessage = isPatternMismatch ? inputElement.dataset.errorMessage : undefined;
 
