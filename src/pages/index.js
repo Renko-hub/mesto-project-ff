@@ -184,7 +184,7 @@ function initApp() {
   }
 
   // Удаление карточки
-  document.addEventListener('click', evt => {
+  document.addEventListener('pointerdown', evt => {
     if (evt.target.classList.contains('card__delete-button')) {
       const cardElement = evt.target.closest('[data-id]');
       if (cardElement) {

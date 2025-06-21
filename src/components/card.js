@@ -38,8 +38,8 @@ function createCard({ name, link, likes, _id, owner }, onClick, currentUserId) {
   likeButton.classList.toggle('card__like-button_is-active', alreadyLiked);
 
   // Добавляем обработчики кликов
-  imageCard.addEventListener('click', () => onClick(link, name));
-  likeButton.addEventListener('click', () =>
+  imageCard.addEventListener('pointerdown', () => onClick(link, name));
+  likeButton.addEventListener('pointerdown', () =>
     toggleLike(_id, likeButton, likeCounterSpan, currentUserId)
   );
 
