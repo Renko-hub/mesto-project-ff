@@ -1,13 +1,13 @@
 // index.js
 
 // Импортируем модули
-import './index.css';                     // Стили
-import * as Api from '../components/api';     // Работа с API
-import * as Card from '../components/card';   // Карточки
+import './index.css';                    // Стили
+import * as Api from '../components/api';    // Работа с API
+import * as Card from '../components/card';  // Карточки
 import * as Modal from '../components/modal'; // Модальные окна
 import * as Validation from '../components/validation'; // Валидация форм
 
-// Настройки конфигурации валидации
+// Настройка конфигурации валидации
 const validationConfig = {
   formSelector: '.popup__form',
   inputSelector: '.popup__input',
@@ -17,7 +17,7 @@ const validationConfig = {
   errorClass: 'popup__error_visible'
 };
 
-// Переменная хранения идентификатора текущего пользователя
+// Переменные
 let currentUserId;
 
 // Интерфейсные элементы
@@ -42,6 +42,15 @@ const profileImage = document.querySelector('.profile__image');
 const editProfileButton = document.querySelector('.profile__edit-button');
 const addPlaceButton = document.querySelector('.profile__add-button');
 
+// Вспомогательные функции
+
+// Переключение состояния кнопки
+function toggleButtonState(button, isDisabled, loadingText = 'Сохранение...') {
+  button.disabled = isDisabled;
+  button.classList.toggle('popup__button_disabled', isDisabled);
+  button.textContent = isDisabled ? loadingText : 'Сохранить';
+}
+
 // Функция отображения полноразмерного изображения
 function showFullscreenImage(imageSrc, imageAlt) {
   const viewImage = viewImagePopup.querySelector('.popup__image');
@@ -51,18 +60,6 @@ function showFullscreenImage(imageSrc, imageAlt) {
   viewImage.alt = imageAlt;
   caption.textContent = imageAlt;
   Modal.openModal(viewImagePopup);
-}
-
-// Функция переключения состояния кнопки
-function toggleButtonState(button, isDisabled, loadingText = 'Сохранение...') {
-  button.disabled = isDisabled;
-  button.classList.toggle('popup__button_disabled', isDisabled);
-  button.textContent = isDisabled ? loadingText : 'Сохранить';
-}
-
-// Функция открытия модального окна
-function openModal(promoWindow) {
-  Modal.openModal(promoWindow);
 }
 
 // Рендер начальной страницы
@@ -81,83 +78,82 @@ function renderInitialCards(userInfo, cards, onClickHandler, currentUserId) {
   });
 }
 
-// Входная точка приложения
+// Главный метод инициализации приложения
 function initApp() {
   // Загрузка начальных данных
   Promise.all([Api.getUserInfo(), Api.getInitialCards()])
-    .then(function ([userInfo, cards]) {
+    .then(([userInfo, cards]) => {
       currentUserId = userInfo._id;
       renderInitialCards(userInfo, cards, showFullscreenImage, currentUserId);
     })
-    .catch(function (err) {
+    .catch((err) => {
       console.error('Ошибка загрузки начальных данных:', err.message);
     });
 
-  // Обработчик редактирования профиля
-  function manageProfile(evt) {
-    if (evt.type === 'pointerdown') {
-      // Очистка валидации перед открытием окна
-      Validation.clearValidation(editProfileForm, validationConfig);
+// Главный метод управления окном редактирования профиля
+function manageProfile(evt) {
+  if (evt.type === 'pointerdown') {
+    // Очищаем ранее созданные ошибки и устанавливаем начальное значение полей
+    Validation.clearValidation(editProfileForm, validationConfig);
 
-      editProfileForm.name.value = titleProfile.textContent;
-      editProfileForm.description.value = descriptionProfile.textContent;
+    // Забираем актуальные значения из профиля
+    editProfileForm.name.value = titleProfile.textContent;
+    editProfileForm.description.value = descriptionProfile.textContent;
 
-      // Блокировка кнопки, если форма невалидна
-      const submitButton = editProfileForm.querySelector('.popup__button[type="submit"]');
-      toggleButtonState(submitButton, !editProfileForm.checkValidity()); // Валидная форма → активная кнопка
+    // Приводим кнопку в активное состояние, чтобы она была активна при открытии окна
+    const submitButton = editProfileForm.querySelector('.popup__button[type="submit"]');
+    submitButton.disabled = false;
+    submitButton.classList.remove('popup__button_disabled');
 
-      openModal(editPopup); // Просто открываем окно
-    } else if (evt.type === 'submit') {
-      evt.preventDefault();
+    // Покажем окно редактирования
+    Modal.openModal(editPopup);
+  } else if (evt.type === 'submit') {
+    evt.preventDefault();
 
-      const formElements = editProfileForm.elements;
-      const submitButton = editProfileForm.querySelector('.popup__button[type="submit"]');
+    const formElements = editProfileForm.elements;
+    const submitButton = editProfileForm.querySelector('.popup__button[type="submit"]');
 
-      const updatedTitle = formElements.name.value.trim();
-      const updatedDescription = formElements.description.value.trim();
+    const updatedTitle = formElements.name.value.trim();
+    const updatedDescription = formElements.description.value.trim();
 
-      if (!updatedTitle || !updatedDescription) {
-        alert("Заполните оба поля!");
-        return;
-      }
-
-      toggleButtonState(submitButton, true);
-
-      setTimeout(() => {
-        Api.updateUserInfo({ name: updatedTitle, about: updatedDescription })
-          .then((updatedUserInfo) => {
-            titleProfile.textContent = updatedUserInfo.name;
-            descriptionProfile.textContent = updatedUserInfo.about;
-            Modal.closeModal(editPopup);
-            toggleButtonState(submitButton, false); // Возвращаем активную кнопку
-          })
-          .catch((err) => {
-            console.error('Ошибка при сохранении профиля:', err.message);
-            toggleButtonState(submitButton, false); // Возвращаем активную кнопку
-          });
-      }, 800);
+    // Если поля пусты, покажем предупреждение
+    if (!updatedTitle || !updatedDescription) {
+      alert("Заполните оба поля!");
+      return;
     }
-  }
 
-  // Обработчик создания новой карточки
+    // Начинаем процесс обновления
+    toggleButtonState(submitButton, true);
+
+    setTimeout(() => {
+      Api.updateUserInfo({ name: updatedTitle, about: updatedDescription })
+        .then((updatedUserInfo) => {
+          titleProfile.textContent = updatedUserInfo.name;
+          descriptionProfile.textContent = updatedUserInfo.about;
+          Modal.closeModal(editPopup);
+          toggleButtonState(submitButton, false); // Возвращаем исходное состояние кнопки
+        })
+        .catch((err) => {
+          console.error('Ошибка при сохранении профиля:', err.message);
+          toggleButtonState(submitButton, false); // Возвращаем исходное состояние кнопки
+        });
+    }, 800);
+  }
+}
+
+  // Создание новой карточки
   function manageCard(evt) {
     if (evt.type === 'pointerdown') {
-      // Очистка валидации перед открытием окна
-      
+      // Очищаем предыдущие ошибки перед открытием окна
       Validation.clearValidation(addNewPlaceForm, validationConfig);
 
-      // Блокировка кнопки, если форма невалидна
-      const submitButton = addNewPlaceForm.querySelector('.popup__button[type="submit"]');
-      toggleButtonState(submitButton, !addNewPlaceForm.checkValidity()); // Валидная форма → активная кнопка
-
-      openModal(addNewCardPopup); // Просто открываем окно
+      // Показываем окно добавления
+      Modal.openModal(addNewCardPopup);
     } else if (evt.type === 'submit') {
       evt.preventDefault();
 
       const formElements = addNewPlaceForm.elements;
       const submitButton = addNewPlaceForm.querySelector('.popup__button[type="submit"]');
-
-      toggleButtonState(submitButton, true);
 
       const placeName = formElements['place-name'].value.trim();
       const linkURL = formElements.link.value.trim();
@@ -166,40 +162,38 @@ function initApp() {
         return;
       }
 
+      // Переводим кнопку в режим ожидания
+      toggleButtonState(submitButton, true);
+
       setTimeout(() => {
         Api.createCard({ name: placeName, link: linkURL })
           .then((newCard) => {
             const newCardElement = Card.createCard(newCard, showFullscreenImage, currentUserId);
             placesList.prepend(newCardElement);
             Modal.closeModal(addNewCardPopup);
-            toggleButtonState(submitButton, false); // Возвращаем активную кнопку
+            toggleButtonState(submitButton, false); // возвращаем исходное состояние кнопки
           })
           .catch((err) => {
             console.error('Ошибка при создании карточки:', err.message);
-            toggleButtonState(submitButton, false); // Возвращаем активную кнопку
+            toggleButtonState(submitButton, false); // возвращаем исходное состояние кнопки
           });
       }, 800);
     }
   }
 
-  // Обработчик изменения аватара
+  // Изменение аватара
   function manageAvatar(evt) {
     if (evt.type === 'pointerdown') {
-      // Очистка валидации перед открытием окна
+      // Очищаем предыдущие ошибки перед открытием окна
       Validation.clearValidation(changeAvatarForm, validationConfig);
 
-      // Блокировка кнопки, если форма невалидна
-      const submitButton = changeAvatarForm.querySelector('.popup__button[type="submit"]');
-      toggleButtonState(submitButton, !changeAvatarForm.checkValidity()); // Валидная форма → активная кнопка
-
-      openModal(document.querySelector('.popup.popup_type_change-avatar')); // Просто открываем окно
+      // Показываем окно изменения аватара
+      Modal.openModal(document.querySelector('.popup.popup_type_change-avatar'));
     } else if (evt.type === 'submit') {
       evt.preventDefault();
 
       const form = evt.currentTarget;
       const submitButton = form.querySelector('.popup__button[type="submit"]');
-
-      toggleButtonState(submitButton, true);
 
       const avatarUrl = form.elements['link'].value.trim();
 
@@ -207,16 +201,19 @@ function initApp() {
         return;
       }
 
+      // Переводим кнопку в режим ожидания
+      toggleButtonState(submitButton, true);
+
       setTimeout(() => {
         Api.updateUserAvatar(avatarUrl)
           .then((updatedUserInfo) => {
             profileImage.style.backgroundImage = `url(${updatedUserInfo.avatar})`;
             Modal.closeModal(document.querySelector('.popup.popup_type_change-avatar'));
-            toggleButtonState(submitButton, false); // Возвращаем активную кнопку
+            toggleButtonState(submitButton, false); // возвращаем исходное состояние кнопки
           })
           .catch((err) => {
             console.error('Ошибка при обновлении аватара:', err.message);
-            toggleButtonState(submitButton, false); // Возвращаем активную кнопку
+            toggleButtonState(submitButton, false); // возвращаем исходное состояние кнопки
           });
       }, 800);
     }
@@ -251,27 +248,25 @@ function initApp() {
   });
 
   // Обработчик закрытия модальных окон
-  const handlePointerDown = function (event, popup) {
+  const handlePointerDown = (event, popup) => {
     if (event.target === popup || event.target.classList.contains('popup__close')) {
       Modal.closeModal(popup);
 
-      // Сброс конкретной формы при закрытии нужного окна
+      // Сброс конкретных форм при закрытии нужных окон
       if (popup === addNewCardPopup) {
-        addNewPlaceForm.reset(); // Сброс формы "Новое место"
+        addNewPlaceForm.reset();
       } else if (popup === document.querySelector('.popup.popup_type_change-avatar')) {
-        changeAvatarForm.reset(); // Сброс формы "Обновление аватара"
+        changeAvatarForm.reset();
       }
     }
   };
 
-  // Прикрепляем обработчики событий ко всем модальным окнам
-  popups.forEach(function (popup) {
-    popup.addEventListener('pointerdown', function (event) {
-      handlePointerDown(event, popup);
-    });
+  // Назначаем обработчики событий для всех модальных окон
+  popups.forEach((popup) => {
+    popup.addEventListener('pointerdown', (event) => handlePointerDown(event, popup));
   });
 
-  // Обработчики событий
+  // Присваиваем обработчики событий
   editProfileButton.addEventListener('pointerdown', manageProfile);
   addPlaceButton.addEventListener('pointerdown', manageCard);
   profileImage.addEventListener('pointerdown', manageAvatar);
@@ -284,5 +279,5 @@ function initApp() {
   Validation.enableValidation(validationConfig);
 }
 
-// Запускаем приложение
+// Инициализация приложения
 initApp();
