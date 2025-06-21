@@ -18,7 +18,7 @@ const validationConfig = {
 };
 
 // Переменные
-let currentUserId;
+
 
 // Интерфейсные элементы
 const popups = document.querySelectorAll('.popup');
@@ -83,6 +83,7 @@ function initApp() {
   // Загрузка начальных данных
   Promise.all([Api.getUserInfo(), Api.getInitialCards()])
     .then(([userInfo, cards]) => {
+      let currentUserId;
       currentUserId = userInfo._id;
       renderInitialCards(userInfo, cards, showFullscreenImage, currentUserId);
     })
