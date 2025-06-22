@@ -1,4 +1,4 @@
-// modules/validation.js
+// validation.js
 
 // Проверяет наличие хотя бы одного неверного элемента
 const hasInvalidInput = (inputList) =>
