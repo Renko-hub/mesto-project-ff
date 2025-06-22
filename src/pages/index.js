@@ -46,6 +46,9 @@ const avatarButton = document.querySelector(".profile__image"); // Кнопка 
 // Глобальная переменная для хранения карточек
 let cardsStorage = {};
 
+// Переменная для хранения временно выбранного ID карточки
+let currentDeletingCardId = null;
+
 // Вспомогательные функции
 
 // Показ большого изображения
@@ -86,23 +89,7 @@ function resetForm(form) {
   Validation.clearValidation(form, validationConfig);
 }
 
-// Подтверждение удаления карточки
-function openDeleteConfirmationModal(cardId) {
-  deleteConfirmPopup.addEventListener(
-    "pointerdown",
-    (evt) => {
-      if (evt.target.classList.contains("popup__button_confirm")) {
-        evt.preventDefault();
-        performCardDeletion(cardId);
-      }
-    },
-    { once: true }
-  );
-
-  Modal.openModal(deleteConfirmPopup);
-}
-
-// Удаление карточки
+// Функция удаления карточки
 function performCardDeletion(cardId) {
   Api.deleteCard(cardId)
     .then(() => {
@@ -113,23 +100,19 @@ function performCardDeletion(cardId) {
       }
       Modal.closeModal(deleteConfirmPopup);
     })
-    .catch(console.error);
+    .catch((err) => console.error(`Ошибка удаления карточки ${cardId}:`, err));
 }
 
-// Клик по кнопке удаления
-function onDeleteButtonClick(cardId) {
-  openDeleteConfirmationModal(cardId);
-}
-
-// Создание карточки с правильным привязыванием события удаления
+// Создание карточки с привязанными событиями
 function createCard(cardData, clickHandler, userId) {
   const cardElement = Card.createCard(cardData, clickHandler, userId);
   cardsStorage[cardData._id] = cardElement;
 
+  // Назначаем обработчик события удаления карточки
   cardElement
     .querySelector(".card__delete-button")
     .addEventListener("click", () => {
-      onDeleteButtonClick(cardData._id);
+      handleDeleteButtonClick(cardData._id);
     });
 
   return cardElement;
@@ -238,6 +221,21 @@ function handleChangeAvatarSubmit(evt) {
   }, 800);
 }
 
+// Основной обработчик удаления карточки
+function handleDeleteButtonClick(cardId) {
+  currentDeletingCardId = cardId; // Запоминаем текущий ID карточки
+  Modal.openModal(deleteConfirmPopup); // Открываем окно подтверждения
+}
+
+// Назначение обработчика подтверждения удаления
+deleteConfirmPopup
+  .querySelector(".popup__button_confirm")
+  .addEventListener("click", (event) => {
+    event.preventDefault();
+    performCardDeletion(currentDeletingCardId); // Выполняем удаление выбранной карточки
+    currentDeletingCardId = null; // Очищаем временную переменную
+  });
+
 // Главный загрузочный блок
 Promise.all([Api.getUserInfo(), Api.getInitialCards()])
   .then(([userInfo, cards]) => {
@@ -269,7 +267,11 @@ changeAvatarForm.addEventListener("submit", handleChangeAvatarSubmit);
 // Закрытие модальных окон
 document.querySelectorAll(".popup").forEach((popup) => {
   popup.addEventListener("pointerdown", (evt) => {
-    if (evt.target === popup || evt.target.classList.contains("popup__close")) {
+    if (
+      evt.target === popup ||
+      evt.target.classList.contains("popup__close") ||
+      evt.target.classList.contains("popup__overlay")
+    ) {
       Modal.closeModal(popup);
     }
   });
