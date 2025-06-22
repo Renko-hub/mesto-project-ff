@@ -98,12 +98,6 @@ function updateButtonState(button, isLoading) {
   button.classList.toggle(validationConfig.inactiveButtonClass, isLoading);
 }
 
-// Сброс формы и очистка полей
-function resetForm(form) {
-  form.reset();
-  Validation.clearValidation(form, validationConfig);
-}
-
 // Удаляет карточку с сервера и интерфейс
 function performCardDeletion(cardId) {
   Api.deleteCard(cardId)
@@ -118,9 +112,11 @@ function performCardDeletion(cardId) {
     .catch((err) => console.error(`Ошибка удаления карточки ${cardId}:`, err));
 }
 
-// Действия при открытии формы редактирования профиля
+// Открытие формы редактирования профиля
 function openEditProfileForm() {
-  resetForm(editProfileForm);
+  const form = editProfileForm; // Используем локально объявленную переменную
+  form.reset(); // Теперь сброс работает корректно
+  Validation.clearValidation(form, validationConfig);
   editProfileForm.name.value = titleProfile.textContent;
   editProfileForm.description.value = descriptionProfile.textContent;
 
@@ -131,15 +127,19 @@ function openEditProfileForm() {
   Modal.openModal(editPopup);
 }
 
-// Действие при изменении аватара
+// Открытие формы изменения аватара
 function openChangeAvatarForm() {
-  resetForm(changeAvatarForm);
+  const form = changeAvatarForm; // Локальная ссылка на нужную форму
+  form.reset(); // Работающий метод сброса формы
+  Validation.clearValidation(form, validationConfig);
   Modal.openModal(document.querySelector(".popup.popup_type_change-avatar"));
 }
 
 // Открытие формы добавления карточки
 function openAddCardForm() {
-  resetForm(addNewPlaceForm);
+  const form = addNewPlaceForm; // Локальное обращение к нужной форме
+  form.reset(); // Метод сброса теперь доступен
+  Validation.clearValidation(form, validationConfig);
   Modal.openModal(addNewCardPopup);
 }
 
