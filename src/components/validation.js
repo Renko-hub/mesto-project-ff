@@ -58,23 +58,6 @@ const toggleButtonState = ({
   submitButtonElement.classList.toggle(inactiveButtonClass, !valid);
 };
 
-// Программно вызывает проверку валидности формы и обновляет состояние кнопки
-const validateAndToggleButton = ({
-  formElement,
-  inputSelector,
-  submitButtonSelector,
-  inactiveButtonClass,
-}) => {
-  const inputList = Array.from(formElement.querySelectorAll(inputSelector));
-  const submitButtonElement = formElement.querySelector(submitButtonSelector);
-
-  toggleButtonState({
-    inputList,
-    submitButtonElement,
-    inactiveButtonClass,
-  });
-};
-
 // Очищает все элементы ошибок формы и возвращает исходное состояние
 const clearValidation = (
   formElement,
@@ -114,14 +97,6 @@ const enableValidation = ({
     const inputList = Array.from(formElement.querySelectorAll(inputSelector));
     const submitButtonElement = formElement.querySelector(submitButtonSelector);
 
-    clearValidation(formElement, {
-      inputSelector,
-      submitButtonSelector,
-      inactiveButtonClass,
-      inputErrorClass,
-      errorClass,
-    });
-
     inputList.forEach((inputElement) => {
       inputElement.addEventListener("input", () => {
         checkInputValidity({ inputElement, inputErrorClass, errorClass });
@@ -144,5 +119,4 @@ export {
   toggleButtonState,
   clearValidation,
   enableValidation,
-  validateAndToggleButton,
 };
