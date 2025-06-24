@@ -53,9 +53,10 @@ Promise.all([Api.getUserInfo(), Api.getInitialCards()])
 
 // Отрисовка начальных карточек
 function renderCards(cards, clickHandler, userId) {
-  cards.forEach((cardData) =>
-    placesList.append(Card.createCard(cardData, clickHandler, userId))
-  );
+  cards.forEach((cardData) => {
+    const cardElement = Card.createCard(cardData, clickHandler, userId);
+    placesList.append(cardElement);
+  });
 }
 
 // Показ полного изображения
@@ -92,7 +93,9 @@ function handleChangeAvatarSubmit(event) {
     Api.updateUserAvatar(avatarLink.value.trim())
       .then((updatedUserInfo) => {
         profileImage.style.backgroundImage = `url(${updatedUserInfo.avatar})`;
-        Modal.closeModal();
+        Modal.closeModal(
+          document.querySelector(".popup.popup_type_change-avatar")
+        );
       })
       .finally(() => {
         updateButtonState(submitButton, false);
@@ -152,7 +155,7 @@ function handleEditProfileSubmit(event) {
       .then((updatedUserInfo) => {
         titleProfile.textContent = updatedUserInfo.name;
         descriptionProfile.textContent = updatedUserInfo.about;
-        Modal.closeModal();
+        Modal.closeModal(editPopup);
       })
       .finally(() => {
         updateButtonState(submitButton, false);
@@ -187,9 +190,9 @@ function handleAddCardSubmit(event) {
           newCard,
           showFullscreenImage,
           newCard.owner._id
-        );
+        ); // Передаем новый ID пользователя
         placesList.prepend(newCardElement);
-        Modal.closeModal();
+        Modal.closeModal(addNewCardPopup);
       })
       .finally(() => {
         updateButtonState(submitButton, false);

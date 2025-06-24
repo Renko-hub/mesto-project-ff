@@ -19,85 +19,51 @@ function createCard({ name, link, likes, _id, owner }, onClick, currentUserId) {
   // Обработка ошибок загрузки картинки
   imageCard.onerror = () => handleImageLoadError(element);
 
-  // Настройки элементов карточки
-  element.dataset.id = _id; // Этот атрибут только для удобства выборки карточки при удалении
+  // Настройка элемента изображения и заголовка
   imageCard.src = link;
   imageCard.alt = name;
   titleCard.textContent = name;
 
-  // Начальное количество лайков
+  // Начальное состояние количества лайков
   const initialLikesCount = Array.isArray(likes) ? likes.length : 0;
   setInitialLikeStatus(initialLikesCount, likeCounterSpan);
 
-  // Если владелец карточки совпадает с текущим пользователем
+  // Скрываем или показываем кнопку удаления в зависимости от владельца
   const isOwner = owner._id === currentUserId;
   deleteButton.classList.toggle("card__delete-button_is-active", isOwner);
 
-  // Проверка, понравился ли пост этому пользователю
-  const alreadyLiked = isCardLiked(_id);
+  // Проверка, поставил ли текущий пользователь лайк
+  const alreadyLiked = checkIfUserLiked(currentUserId, likes);
   likeButton.classList.toggle("card__like-button_is-active", alreadyLiked);
 
-  // Добавляем события кликов
+  // Назначаем события кликов
   imageCard.addEventListener("pointerdown", () => onClick(link, name));
   likeButton.addEventListener("pointerdown", () =>
     toggleLike(_id, likeButton, likeCounterSpan, currentUserId)
   );
-
-  // Слушатель события удаления передан прямо при объявлении
-  deleteButton.addEventListener("pointerdown", () =>
-    openDeleteConfirmation(_id)
-  );
+  deleteButton.addEventListener("pointerdown", () => removeCard(_id, element));
 
   return element;
 }
 
-// Открытие модального окна подтверждения удаления
-function openDeleteConfirmation(cardId) {
-  const deleteConfirmPopup = document.querySelector(
-    ".popup.popup_type_delete-confirm"
-  );
-  Modal.openModal(deleteConfirmPopup);
-
-  // Передаем карту в качестве параметра в обработчик подтверждения
-  document
-    .querySelector(".popup.popup_type_delete-confirm .popup__button_confirm")
-    .addEventListener("click", () => confirmDeletion(cardId), { once: true });
-}
-
-// Подтверждение удаления карточки
-function confirmDeletion(cardId) {
-  Api.deleteCard(cardId)
-    .then(() => {
-      const cardElement = document.querySelector(`[data-id="${cardId}"]`);
-      if (cardElement) cardElement.remove();
-      Modal.closeModal(
-        document.querySelector(".popup.popup_type_delete-confirm")
-      );
-    })
-    .catch((err) => console.error(`Ошибка удаления карточки ${cardId}:`, err));
-}
-
 // Переключение состояния лайка
 function toggleLike(cardId, buttonElement, counterElement, currentUserId) {
-  return new Promise((resolve) => {
-    const wasLikedBefore = buttonElement.classList.contains(
-      "card__like-button_is-active"
-    );
-    const action = wasLikedBefore ? "unLike" : "like";
-    const apiAction = wasLikedBefore ? Api.unLikeCard : Api.likeCard;
+  const wasLikedBefore = buttonElement.classList.contains(
+    "card__like-button_is-active"
+  );
+  const action = wasLikedBefore ? "unLike" : "like";
+  const apiAction = wasLikedBefore ? Api.unLikeCard : Api.likeCard;
 
-    apiAction(cardId)
-      .then(() => {
-        saveLikeState(cardId, !wasLikedBefore);
-        resolve(!wasLikedBefore);
-      })
-      .catch((error) => console.error(`Ошибка переключения лайка: ${error}`));
-  }).then((isNowLiked) => {
-    updateUIOnLike(buttonElement, counterElement, isNowLiked);
-  });
+  apiAction(cardId)
+    .then(() => {
+      updateUIOnLike(buttonElement, counterElement, !wasLikedBefore);
+    })
+    .catch((error) => {
+      console.error(`Ошибка переключения лайка: ${error}`);
+    });
 }
 
-// Обновление интерфейса после смены состояния лайка
+// Обновление UI после изменения состояния лайка
 function updateUIOnLike(buttonElement, counterElement, liked) {
   buttonElement.classList.toggle("card__like-button_is-active", liked);
   liked
@@ -105,7 +71,7 @@ function updateUIOnLike(buttonElement, counterElement, liked) {
     : decrementLikeCounter(counterElement);
 }
 
-// Инициализация отображения числа лайков
+// Устанавливаем начальное значение счётчика лайков
 function setInitialLikeStatus(count, counterElement) {
   if (count > 0) {
     counterElement.textContent = count.toString();
@@ -115,7 +81,7 @@ function setInitialLikeStatus(count, counterElement) {
   }
 }
 
-// Инкрементация счётчика лайков
+// Инкрементируем счётчик лайков
 function incrementLikeCounter(counterElement) {
   const currentCount = Number(counterElement.textContent) || 0;
   counterElement.textContent = `${currentCount + 1}`;
@@ -123,7 +89,7 @@ function incrementLikeCounter(counterElement) {
   counterElement.classList.remove("hidden");
 }
 
-// Декрементация счётчика лайков
+// Декрементируем счётчик лайков
 function decrementLikeCounter(counterElement) {
   const currentCount = Number(counterElement.textContent) || 0;
   if (currentCount <= 1) {
@@ -135,20 +101,23 @@ function decrementLikeCounter(counterElement) {
   }
 }
 
-// Хранение состояния лайков в Local Storage
-function saveLikeState(cardId, state) {
-  let likedCards = JSON.parse(localStorage.getItem("likedCards")) || {};
-  likedCards[cardId] = state;
-  localStorage.setItem("likedCards", JSON.stringify(likedCards));
+// Проверяет, лайкнул ли пользователь карточку
+function checkIfUserLiked(currentUserId, likes) {
+  return likes.some((like) => like._id === currentUserId);
 }
 
-// Проверка наличия лайка у карты
-function isCardLiked(cardId) {
-  const likedCards = JSON.parse(localStorage.getItem("likedCards")) || {};
-  return !!likedCards[cardId];
+// Удаляет карточку без подтверждения
+function removeCard(cardId, element) {
+  Api.deleteCard(cardId)
+    .then(() => {
+      element.remove(); // Удаляем элемент из DOM
+    })
+    .catch((err) => {
+      console.error(`Ошибка удаления карточки: ${err}`);
+    });
 }
 
-// Обработка ошибки загрузки изображения
+// Обрабатывает ошибку загрузки изображения
 function handleImageLoadError(cardElement) {
   cardElement.classList.add("card__image-error");
   [".card__description", ".card__like-counter"].forEach((selector) => {
@@ -157,5 +126,5 @@ function handleImageLoadError(cardElement) {
   });
 }
 
-// Экспорт нужной функции
+// Экспорт главной функции
 export { createCard };
