@@ -82,8 +82,8 @@ function openChangeAvatarForm() {
 }
 
 // Основной обработчик отправки формы изменения аватара
-function handleChangeAvatarSubmit(event) {
-  event.preventDefault();
+function handleChangeAvatarSubmit(evt) {
+  evt.preventDefault();
   const { link: avatarLink } = changeAvatarForm.elements;
   const submitButton = changeAvatarForm.querySelector(".popup__button");
 
@@ -140,8 +140,8 @@ function openEditProfileForm() {
 }
 
 // Основная логика обработки отправленной формы редактирования профиля
-function handleEditProfileSubmit(event) {
-  event.preventDefault();
+function handleEditProfileSubmit(evt) {
+  evt.preventDefault();
   const { name, description } = editProfileForm.elements;
   const submitButton = editProfileForm.querySelector(".popup__button");
 
@@ -172,8 +172,8 @@ function openAddCardForm() {
 }
 
 // Основной обработчик отправки формы добавления карточки
-function handleAddCardSubmit(event) {
-  event.preventDefault();
+function handleAddCardSubmit(evt) {
+  evt.preventDefault();
   const { "place-name": placeNameInput, link: linkInput } =
     addNewPlaceForm.elements;
   const submitButton = addNewPlaceForm.querySelector(".popup__button");
